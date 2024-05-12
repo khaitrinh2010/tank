@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Explosion.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tanks_scaffold (1)</a> &gt; <a href="index.source.html" class="el_package">Tanks</a> &gt; <span class="el_source">Explosion.java</span></div><h1>Explosion.java</h1><pre class="source lang-java linenums">package Tanks;
+
+import processing.core.PApplet;
+
+public class Explosion extends Thing{
+    private PApplet sketch;
+    private float radius;
+<span class="fc" id="L8">    private boolean hasDoneExplode = false;</span>
+<span class="fc" id="L9">    private int time = 200; //which  is 0.2 seconds</span>
+    private float startTime;
+    private Tank tank;
+    public Explosion (Tank tank, PApplet sketch, float x, float y, float radius, Projectile projectile){
+<span class="fc" id="L13">        super((int) x, y);</span>
+<span class="fc" id="L14">        this.tank = tank;</span>
+<span class="fc" id="L15">        this.sketch = sketch;</span>
+<span class="fc" id="L16">        this.radius = radius;</span>
+<span class="fc" id="L17">        this.startTime = this.sketch.millis();</span>
+<span class="fc" id="L18">    }</span>
+    public Tank getTank(){
+<span class="fc" id="L20">        return this.tank;</span>
+    }
+    public void drawExplosion(){
+<span class="pc bpc" id="L23" title="1 of 2 branches missed.">        if(!hasDoneExplode){</span>
+<span class="fc" id="L24">            float currentTime = this.sketch.millis();</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">            if(currentTime &gt;= (this.startTime + time)){</span>
+<span class="fc" id="L26">                hasDoneExplode = true;</span>
+            }
+            else {
+<span class="fc" id="L29">                this.sketch.fill(255,0, 0);</span>
+<span class="fc" id="L30">                this.sketch.ellipse(this.x, this.y, this.radius*2*(currentTime - this.startTime)/200, this.radius*2*(currentTime-startTime)/200);</span>
+
+<span class="fc" id="L32">                this.sketch.fill(255, 150, 0);</span>
+<span class="fc" id="L33">                this.sketch.ellipse(this.x, this.y, this.radius*(currentTime - this.startTime)/200, this.radius*(currentTime-startTime)/200);</span>
+
+<span class="fc" id="L35">                this.sketch.fill(255, 255, 0);</span>
+<span class="fc" id="L36">                this.sketch.ellipse(this.x, this.y, this.radius*0.4f*(currentTime-this.startTime)/200, this.radius*0.4f*(currentTime-startTime)/200);</span>
+            }
+        }
+<span class="fc" id="L39">    }</span>
+
+    public float getRadius(){
+<span class="fc" id="L42">        return this.radius;</span>
+    }
+    public boolean isHasDoneExplode(){
+<span class="fc" id="L45">        return hasDoneExplode;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

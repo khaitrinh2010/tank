@@ -5,94 +5,95 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Projectile extends Thing{
     //Initial fire position
-    private float x;
-    private float y;
-    private float initialHeight;
     private float power;
     private ArrayList<Explosion> explosionList = new ArrayList<>();
     private float gravity = 3.6f; //gravity rate
-    private PApplet sketch;
-    JSONObject parseJson;
     private float veloHori;
     private float veloVerti;
     private boolean hasFired = false;
-    private boolean hasDone;
     float[] terrainY;
     private Tank tank;
-    //rsin how quick it moves related to the y axis, rcos how quick it moves related to the x axis
-    public Projectile (Tank tank, JSONObject parseJson, PApplet sketch, float x, float y, float power, float angle, float[] terrainHeight){
-        super(parseJson, sketch);
+    private boolean ulti;
+    /**
+     * Constructs a Projectile object with specific parameters.
+     *
+     * @param tank The tank that fired the projectile.
+     * @param x The initial x-coordinate of the projectile.
+     * @param y The initial y-coordinate of the projectile.
+     * @param power The power of the projectile which affects its velocity.
+     * @param angle The firing angle of the projectile.
+     * @param terrainHeight The height data of the terrain for collision detection.
+     * @param fromUlti Indicates whether the projectile is fired as part of an ultimate ability.
+     */
+    public Projectile (Tank tank, float x, float y, float power, float angle, float[] terrainHeight, boolean fromUlti){
+        super((int) x, y);
         this.tank = tank;
-        this.sketch = sketch;
-        this.x = x;
-        this.y = y;
-        initialHeight = this.y;
         this.power = power;
         angle -= PConstants.HALF_PI;
         this.veloHori =  this.power * (float) Math.cos(angle);
         this.veloVerti = this.power * (float) Math.sin(angle);
         terrainY = terrainHeight;
-        this.hasDone = true;
+        ulti = fromUlti;
     }
-    public void handleError(){
-        if(this.x > 864){
-            this.x = 864;
-        }
-        if(this.x < 0){
-            this.x = 0;
-        }
-        if(this.y > 640){
-            this.y = 640;
-        }
-        if((this.y) < 0){
-            this.y = 0;
-        }
-    }
-    public void fire(float deltaTime, int windPower){
-        this.x += (float) (this.veloHori + windPower*0.03f);
-        this.veloVerti += gravity*deltaTime;
+
+    /**
+     * Update the position of this projectile based on the power, velocity and wind power
+     * @param windPower, an integer indicates the power of the wind affect the bullet
+     */
+    public void fire(int windPower){
+        this.x += (int) (this.veloHori + windPower*0.03f);
+        this.veloVerti += gravity /30;
         this.y += this.veloVerti;
-        //handleError();
     }
-    public void renderProjectile(){
-        //handleError();
-        this.sketch.fill(100, 100, 100);
-        this.sketch.ellipse(this.x, this.y, 12, 12); //draw a bullet of 12,12
+
+    /**
+     * Draw the projectile
+     * @param sketch, PApplet instance for drawing
+     * @param projColour, an array with RGB values determine the colour of the projectile
+     */
+    public void renderProjectile(PApplet sketch, int[] projColour){
+        if(!ulti) {
+            sketch.fill(projColour[0], projColour[1], projColour[2]);
+            sketch.ellipse(this.x, this.y, 12, 12);
+        }
+        else{
+            sketch.fill(projColour[0], projColour[1], projColour[2]);
+            sketch.ellipse(this.x, this.y, 18, 18);
+        }
+        sketch.fill(0);
+        sketch.ellipse(this.x, this.y, 4, 4);
     }
-    public float getX(){
-        return this.x;
-    }
-    public float getY(){
-        return this.y;
-    }
-    public boolean hasDoneFired(){
-        handleError();
+
+    /**
+     * Determines whether the projectile has hit a target, if yes, it will create an Explosion object
+     * @param sketch, PApplet instance for drawing explosions.
+     * @param terrainY, the heights array to check whether the bullet has hit the terrain
+     * @return true if the projectile has hit the terrain, false otherwise.
+     */
+    public boolean hasDoneFired(PApplet sketch, float[] terrainY){
         if(this.y >= 640 || this.y <= 0 || this.x >= 864 || this.x <= 0){
-            Explosion newExplosion = new Explosion(this.tank, this.sketch, this.x, this.y, 30);
+            Explosion newExplosion = new Explosion(this.tank, sketch, this.x, this.y, 30, this);
             this.explosionList.add(newExplosion);
             return true;
-
-
         }
         for(int i = 0; i < terrainY.length; i++){
-            int currentX = (int) Math.floor(this.x);
+            int currentX = (int) (double) this.x;
             if(terrainY[currentX] <= this.y && !hasFired){
-                Explosion newExplosion = new Explosion(this.tank, this.sketch, this.x, this.y, 30);
-                this.tank.getTankExpllosionList().add(newExplosion);
+                Explosion newExplosion = null;
+                if(!ulti) {
+                    newExplosion = new Explosion(this.tank, sketch, this.x, this.y, 30, this);
+                }
+                else{
+                    newExplosion = new Explosion(this.tank, sketch, this.x, this.y, 45, this);
+                }
+                this.tank.getTankExplosionList().add(newExplosion);
                 return true;
-
             }
         }
         return false;
 
     }
-
-    public ArrayList<Explosion>  getExplosionList(){
-        return this.explosionList;
-    }
-
 }

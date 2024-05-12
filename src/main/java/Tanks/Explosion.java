@@ -2,29 +2,31 @@ package Tanks;
 
 import processing.core.PApplet;
 
-public class Explosion {
+public class Explosion extends Thing{
     private PApplet sketch;
-    private float x;
-    private float y;
     private float radius;
     private boolean hasDoneExplode = false;
     private int time = 200; //which  is 0.2 seconds
     private float startTime;
-    private int count = 0;
-    private boolean active = true;
-    private boolean hasBeenProcessed = false;
     private Tank tank;
-    public Explosion(Tank tank, PApplet sketch, float x, float y, float radius){
+    public Explosion (Tank tank, PApplet sketch, float x, float y, float radius, Projectile projectile){
+        super((int) x, y);
         this.tank = tank;
         this.sketch = sketch;
-        this.x = x;
-        this.y = y;
         this.radius = radius;
         this.startTime = this.sketch.millis();
     }
+
+    /**
+     * Retrieves the tank that cause the explosion
+     * @return The tank that caused this explosion
+     */
     public Tank getTank(){
         return this.tank;
     }
+    /**
+     * Draw the explosion, which expands over time until it reaches its limit
+     */
     public void drawExplosion(){
         if(!hasDoneExplode){
             float currentTime = this.sketch.millis();
@@ -40,19 +42,21 @@ public class Explosion {
 
                 this.sketch.fill(255, 255, 0);
                 this.sketch.ellipse(this.x, this.y, this.radius*0.4f*(currentTime-this.startTime)/200, this.radius*0.4f*(currentTime-startTime)/200);
-
             }
         }
     }
-    public float getX(){
-        return this.x;
-    }
-    public float getY(){
-        return this.y;
-    }
+
+    /**
+     * Return the radius of this explosion
+     * @return a float represents the radius of this explosion
+     */
     public float getRadius(){
         return this.radius;
     }
+    /**
+     * Check if this explosion has completed the animation
+     * @return true if it has completed, false otherwise
+     */
     public boolean isHasDoneExplode(){
         return hasDoneExplode;
     }

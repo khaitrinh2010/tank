@@ -2,13 +2,10 @@ package Tanks;
 
 import org.json.JSONObject;
 import processing.core.PApplet;
-import processing.core.PConstants;
 import processing.core.PImage;
 import java.util.*;
 
-import java.util.Arrays;
-
-import static com.google.common.primitives.Floats.min;
+import static java.lang.Math.abs;
 /* NOTE THAT:
  * x is the areaa under X
  * X is the terrain height
@@ -17,79 +14,64 @@ import static com.google.common.primitives.Floats.min;
  * @ denotes empty space (the sky that aboves the X)
  * */
 
-public class Terrain extends Thing {
-    private JSONObject layoutSetting;
+public class Terrain {
     private PApplet sketch;
-    private GameState gameState;
-    private boolean hasDoneUpdate = true;
-    private String layoutPath;
-    private PImage backgroundImage;
-    private String foregroundColor;
-    private PImage treesImage;
-    private JSONObject parseJSON;
+    public GameState gameState;
     private HashSet<Explosion> destruction;
-
     float[] averageHeight = new float[896]; //each pixel
-    private ArrayList<Tank> tanksList;
-    private ArrayList<float[]> treesList;
-    boolean[] treesPosition = new boolean[28];
+    public ArrayList<Tank> tanksList;
     //Max 28 trees;
-    float[] randomList = new float[28];
-    private String foreGroundColor;
-    private int[] colorList = new int[3];
-    String currentWorkingDir = System.getProperty("user.dir");
-
-    public Terrain (JSONObject parseJSON, PApplet sketch, GameState gameState, JSONObject layoutSetting, float[] averageHeight, ArrayList<Tank> tanksList, ArrayList<float[]> treesList, boolean[] treesPosition, float[] randomList){
-        super(parseJSON, sketch);
+    private boolean[] hasDead;
+    private boolean[] hasUpdated;
+    ArrayList<Explosion> handleDraw;
+    Level currentLevel;
+    /**
+     * Constructs a Terrain object with a specified game state, layout setting, height data, list of tanks, and the current level.
+     *
+     * @param gameState The game state associated with this terrain.
+     * @param averageHeight An array of float representing the height of terrain at each horizontal pixel.
+     * @param tanksList A list of tanks currently active on this terrain.
+     * @param level The current level object associated with this terrain.
+     */
+    public Terrain (GameState gameState, float[] averageHeight, ArrayList<Tank> tanksList, Level level){
         this.gameState = gameState;
-        this.parseJSON = parseJSON;
-        this.sketch = sketch;
-        this.layoutSetting = layoutSetting;
         this.averageHeight = averageHeight;
         this.tanksList = tanksList;
-        this.treesList = treesList;
-        this.treesPosition = treesPosition;
-        this.randomList = randomList;
         this.destruction = new HashSet<>();
-        loadImages();
-
-
-
+        currentLevel = level;
+        hasDead = new boolean[this.tanksList.size()];
+        hasUpdated = new boolean[this.tanksList.size()];
+        Arrays.fill(hasDead, false);
+        handleDraw = new ArrayList<>();
     }
-    private void loadImages(){
-        this.layoutPath = this.layoutSetting.getString("layout");
-        String backgroundImagePath = currentWorkingDir + "/src/main/resources/Tanks/" + this.layoutSetting.getString("background");
-        this.backgroundImage = this.sketch.loadImage(backgroundImagePath);
-        this.foregroundColor = this.layoutSetting.getString("foreground-colour");
-        colorList[0] = Integer.parseInt(this.foregroundColor.split(",")[0]);
-        colorList[1] = Integer.parseInt(this.foregroundColor.split(",")[1]);
-        colorList[2] = Integer.parseInt(this.foregroundColor.split(",")[2]);
-        if(this.layoutSetting.has("trees")){
-            String treesImagePath = currentWorkingDir + "/src/main/resources/Tanks/" + this.layoutSetting.getString("trees");
-            this.treesImage = this.sketch.loadImage(treesImagePath);
-            this.treesImage.resize(30, 30);
-        };
+
+    /**
+     * Returns the average height data of this terrain
+     * @return  a float array represents the height at each point in this terrain
+     */
+    public float[] getAverageHeight(){
+        return this.averageHeight;
     }
+
+    /**
+     * Calculates the impact of a explosion in the terrain
+     * @param x, x coordinate of the terrain
+     * @param y, y coordinate of terrain
+     * @param centerX, x coordinate of the explosion
+     * @param centerY, y coordinate of explosion
+     * @return teh distance from the center of the explosion
+     */
     public double calculateImpactRange(float x, float y, float centerX, float centerY){
         return (Math.pow(centerX-x,2) + Math.pow(centerY-y,2));
     }
-    public float getNewY(float centerX, float centerY, float x, float y, float radius){
-        if(y < centerY - radius){
-            return centerY - (float)Math.sqrt(Math.pow(radius, 2) - Math.pow(centerX - x, 2));
-        }
-        return centerY + (float)Math.sqrt(Math.pow(radius, 2) - Math.pow(centerX - x, 2));
-    }
+
+    /**
+     * Update the tank's properties based on the destruction in the terrain
+     * @param destruction, a set of destruction's to handle
+     */
     public void updateTank(HashSet<Explosion> destruction){
-        Iterator<Tank> it = this.tanksList.iterator();
-        while(it.hasNext()){
-            Tank nextTank = it.next();
-            if(nextTank.getHealth() <= 0){
-                this.gameState.deleteTank(nextTank);
-                it.remove();
-            }
-        }
         for(Explosion explosion: destruction) {
-            float centerX = explosion.getX();
+            int centerX = explosion.getX();
             float centerY = explosion.getY();
             float radius = explosion.getRadius();
             Tank tankCausation = explosion.getTank();
@@ -100,34 +82,63 @@ public class Terrain extends Thing {
                 double distance = calculateImpactRange(tankX, tankY, centerX, centerY);
                 double trueDistance = Math.sqrt(distance);
                 double damage = 0;
-                if(trueDistance <= radius){
+                if(trueDistance <= radius && tank.getHealth() > 0){
                     damage = (1 - trueDistance/radius)*60;
-                    tank.setHealth((int) damage);
-                    tankCausation.setPoint((int) damage);
+                    tank.setHealth(tank.getHealth() - (int) damage);
+                    if(tank != tankCausation) {
+                        tankCausation.setPoint(tankCausation.getPoint() + (int) damage);
+                    }
                 }
             }
         }
     }
+
+    /**
+     * Update the terrain's height at coordinates that are affected by the explosion in the terrain
+     * @param destruction,  a set of destruction's to handle
+     */
     public void updateTerrain(HashSet<Explosion> destruction){
         for(Explosion e: destruction){
-            float centerX = e.getX();
+            int centerX = (int) e.getX();
             float centerY = e.getY();
             float radius = e.getRadius();
-            int start = (int) Math.max(0, centerX - radius);
-            int end = (int) Math.min(864, centerX + radius);
-            for(int i = start; i <= end; i++){
-                if(this.averageHeight[i] <= centerY + radius){
-                    this.averageHeight[i] = getNewY(centerX, centerY, i, this.averageHeight[i], radius);
+            int start = Math.max(0, (int)  (centerX - radius));
+            int end = Math.min(864, (int) (centerX + radius));
+            for(int i = start; i < end; i++) {
+                float distance = (float) Math.sqrt(Math.pow(radius, 2) - Math.pow(centerX - i, 2));
+                if (this.averageHeight[i] < centerY - distance){
+                    this.averageHeight[i] += 2 * distance;
                 }
-            }
-            hasDoneUpdate = true;
-        }
+                else if (this.averageHeight[i] >= centerY - distance && this.averageHeight[i] <= centerY + distance) {
+                    this.averageHeight[i] = centerY + distance;
+                }
 
+            }
+        }
     }
 
+    /**
+     * draw any explosion that has not completed the animation in the terrain
+     */
+    public void drawExplosion(){
+        Iterator<Explosion> it = handleDraw.iterator();
+        while(it.hasNext()){
+            Explosion nextExplosion = it.next();
+            if(!nextExplosion.isHasDoneExplode()){
+                nextExplosion.drawExplosion();
+            }
+            else{
+                it.remove();
+            }
+        }
+    }
+
+    /**
+     * Set the height of the tank to new height if the terrain is destroyed, also check whether the tank has been deduced health by falling
+     */
     public void updateTankHeight(){
         ArrayList<Explosion> destruct = new ArrayList<>(this.destruction);
-        Explosion explosion;
+        Explosion explosion = null;
         Tank tankCause = null;
         if(!destruct.isEmpty()){
             explosion  = destruct.get(0);
@@ -137,52 +148,131 @@ public class Terrain extends Thing {
             int xTank = tank.getX();
             float newY = this.averageHeight[xTank];
             if(newY != tank.getY()) {
-                //System.out.println("Tank " + tank.getPlayerNumber() + " is damaged by being fall of " + ((int) newY - tank.getY()));
                 int damage = (int) (newY - tank.getY());
-                if(tank.getParachuteCount() == 0) {
-                    tank.reduceHealthByFall(damage);
-                    if (tankCause != null) {
-                        tankCause.increasePointByFallTerrain(damage);
+                if((tank.getParachuteCount() == 0 || tank.getY() >= 640) && !hasUpdated[this.tanksList.indexOf(tank)]) {
+                    hasUpdated[this.tanksList.indexOf(tank)] = true;
+                    if (tankCause != null && tankCause != tank && (tank.getHealth() > 0) && tank.getX() <= explosion.getX() + explosion.getRadius() && tank.getX() >= explosion.getX() - explosion.getRadius()){
+                        tankCause.setPoint(tankCause.getPoint() + damage);
                     }
+                    tank.setHealth(tank.getHealth() - damage);
                 }
-                tank.reduceY(1.0f / this.sketch.frameRate, newY);
+                tank.reduceY(1.0f / sketch.frameRate, newY);
             }
+            else{
+                hasUpdated[this.tanksList.indexOf(tank)] = false;
+            }
+        }
+        for(Tank tank: this.tanksList){
+            tank.setAverageHeight(this.averageHeight);
         }
         this.destruction.clear();
     }
 
-    public void renderTerrain(){
-        this.sketch.image(this.backgroundImage,0,0);
-        //DRAW THE MAP
-        if(!this.destruction.isEmpty()) {
-            updateTank(this.destruction);
-            updateTerrain(this.destruction);
-        }
-        updateTankHeight();
-        for (int i = 0; i < this.averageHeight.length; i++) {
-            this.sketch.stroke(colorList[0], colorList[1], colorList[2]);
-            this.sketch.line(i, this.averageHeight[i], i, 640);
-        }
-
-        for(int i = 0; i < this.treesList.size();  i++){
-            int x = (int) this.treesList.get(i)[0]; // toa do x
-            float origY =  this.averageHeight[x*32 + 16];
-            float randomNum = this.treesList.get(i)[2];
-            int imageHeight = this.treesImage.height;
-            float y = Math.max(origY - imageHeight, origY - imageHeight + randomNum);
-            if(treesPosition[x]){ //which denotes there's a tree there
-                this.sketch.image(this.treesImage, x*32, y + 2); //add a small number to ensure no floating trees
-            }
-        }
-        this.gameState.drawScoreBoard();
-        for(int i = 0; i < this.tanksList.size(); i++){
-            Tank tankToDraw = this.tanksList.get(i);
-            if(!tankToDraw.getTankExpllosionList().isEmpty()) {
-                this.destruction.add(tankToDraw.getTankExpllosionList().get(0));
-            }
-            tankToDraw.drawTank();
-            tankToDraw.endTurn();
-        }
+    /**
+     * Set the game state associated with this terrain
+     * @param newState, a GameState object.
+     */
+    public void setState(GameState newState){
+        this.gameState = newState;
     }
 
+    /**
+     * Get the tanks that are displayed on this terrain
+     * @return an ArrayList of Tank object
+     */
+    public ArrayList<Tank> getTankList(){
+        return this.tanksList;
+    }
+
+    /**
+     * adjust the height of the terrain at any specific point
+     * @param index, the x coordinate want to be changed
+     * @param newY, the new y coordinate at the point.
+     */
+    public void setTerrain(int index, float newY){
+        this.averageHeight[index] = newY;
+    }
+
+    /**
+     * When a level is transited, update the tanks active in this terrain.
+     * @param tanks, a new ArrayList of Tank object.
+     */
+    public void setTanks(ArrayList<Tank> tanks){
+        this.tanksList = tanks;
+    }
+
+    /**
+     * Renders the terrain including tanks, explosions, and other elements.
+     *
+     * @param sketch The PApplet used for drawing.
+     * @param treesList A list of tree coordinates and modifications.
+     * @param treesPosition A boolean array indicating the presence of trees.
+     * @param assets A list of PImages used as visual assets.
+     * @param colorList An array of color values for drawing.
+     */
+    public void renderTerrain(PApplet sketch, ArrayList<float[]> treesList, boolean[] treesPosition, ArrayList<PImage> assets, int[] colorList){
+            sketch.image(assets.get(0), 0, 0);
+            if(hasUpdated.length != this.tanksList.size()){
+                hasUpdated = new boolean[this.tanksList.size()];
+                Arrays.fill(hasUpdated, false);
+            }
+            //DRAW THE MAP
+            drawExplosion();
+            updateTerrain(this.destruction);
+            updateTank(this.destruction);
+            this.updateTankHeight();
+            for (int i = 0; i < this.averageHeight.length; i++) {
+                sketch.stroke(colorList[0], colorList[1], colorList[2]);
+                sketch.rect(i, this.averageHeight[i], 1, 640 - this.averageHeight[i]);
+            }
+            for (int i = 0; i < treesList.size(); i++) {
+                int x = (int) treesList.get(i)[0]; // toa do x
+                float randomNum = treesList.get(i)[2];
+                int imageHeight = assets.get(1).height;
+                if (treesPosition[x]) { //which denotes there's a tree there
+                    int xPos = (int) (x*32 + randomNum);
+                    if(xPos >= 896){
+                        xPos = 895;
+                    }
+                    else if(xPos < 0){
+                        xPos = 0;
+                    }
+                    float yPos = (int) Math.min(895, this.averageHeight[Math.min(895, xPos + 16)] - imageHeight);
+                    sketch.image(assets.get(1), xPos, yPos);
+                }
+            }
+            this.gameState.drawScoreBoard();
+            if(this.currentLevel.isGameOver()){
+                return;
+            }
+
+            for (int i = 0; i < this.tanksList.size(); i++){
+                Tank tankToDraw = this.tanksList.get(i);
+                if(hasDead.length == this.tanksList.size()) {
+                    if (!hasDead[i] && (tankToDraw.getHealth() <= 0 || tankToDraw.getY() >= 640) && this.averageHeight[tankToDraw.getX()] <= tankToDraw.getY()) {
+                        if(tankToDraw.getHealth() <= 0) {
+                            handleDraw.add(new Explosion(tankToDraw, sketch, tankToDraw.getX(), tankToDraw.getY(), 15, null));
+                        }
+                        else if(tankToDraw.getY() >= 640){
+                            handleDraw.add(new Explosion(tankToDraw, sketch, tankToDraw.getX(), tankToDraw.getY(), 30, null));
+
+                        }
+                        hasDead[i] = true;
+                        tankToDraw.setHealth(0);
+                    }
+                }
+                else{
+                    hasDead = new boolean[this.tanksList.size()];
+
+                }
+                if (!tankToDraw.getTankExplosionList().isEmpty()) {
+                    Explosion firstExplosion = tankToDraw.getTankExplosionList().get(0);
+                    this.destruction.addAll(tankToDraw.getTankExplosionList());
+                    handleDraw.addAll(tankToDraw.getTankExplosionList());
+                    tankToDraw.getTankExplosionList().remove(firstExplosion);
+                }
+                tankToDraw.drawTank(sketch);
+                tankToDraw.endTurn();
+            }
+    }
 }

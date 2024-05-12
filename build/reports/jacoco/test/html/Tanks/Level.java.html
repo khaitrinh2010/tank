@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Level.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tanks_scaffold (1)</a> &gt; <a href="index.source.html" class="el_package">Tanks</a> &gt; <span class="el_source">Level.java</span></div><h1>Level.java</h1><pre class="source lang-java linenums">package Tanks;
+import org.json.JSONObject;
+import org.json.JSONArray;
+import processing.core.PApplet;
+import processing.core.PImage;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+
+//This will setup all the information about the current level of the game
+
+public class Level {
+    private int levelNumber;
+    private Level prevLevel;
+<span class="fc" id="L18">    ArrayList&lt;PImage&gt; assets = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L19">    ArrayList&lt;PImage&gt; assets2 = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L20">    float[] averageHeight = new float[896]; //each pixel</span>
+<span class="fc" id="L21">    boolean[] treesPosition = new boolean[28]; //32 pixels each</span>
+    private PApplet sketch;
+    // a json object in the config.json file represent the currentLevel object
+    private JSONObject currentLevel;
+<span class="fc" id="L25">    private boolean isDoneLevel = false;</span>
+    private String configFilePath;
+    private JSONObject parsedJSON;
+<span class="fc" id="L28">    private ArrayList&lt;Tank&gt; tanksList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L29">    private ArrayList&lt;float[]&gt; treesList = new ArrayList&lt;&gt;();</span>
+    private GameState currentState;
+<span class="fc" id="L31">    float[] randomList = new float[28];</span>
+    ArrayList&lt;Level&gt; allLevels;
+<span class="fc" id="L33">    int[] colorList = new int[3];</span>
+    private Level prevlevel;
+<span class="fc" id="L35">    private int startTime = 0;</span>
+
+    //constructor of the class
+<span class="fc" id="L38">    public Level(PApplet sketch, String configFilePath, int levelNumber, Level prevLevel){</span>
+<span class="fc" id="L39">        this.sketch = sketch;</span>
+<span class="fc" id="L40">        this.configFilePath = configFilePath;</span>
+<span class="fc" id="L41">        this.levelNumber = levelNumber;</span>
+<span class="fc" id="L42">        this.currentLevel = parseJSONFile();</span>
+<span class="fc" id="L43">        this.prevLevel = prevLevel;</span>
+<span class="fc" id="L44">        randomNum();</span>
+<span class="fc" id="L45">        extractTXTFile();</span>
+<span class="fc" id="L46">    }</span>
+    /* PARSE THE JSON FILE*/
+    public JSONObject parseJSONFile(){
+        try{
+            //Read the content of the JSON File
+<span class="fc" id="L51">            String content = new String(Files.readAllBytes(Paths.get(this.configFilePath)));</span>
+            //Parse the content into a JSON object;
+<span class="fc" id="L53">            JSONObject jsonObject = new JSONObject(content);</span>
+<span class="fc" id="L54">            this.parsedJSON = jsonObject;</span>
+            //The levels array in the config.json file
+<span class="fc" id="L56">            JSONArray levels = jsonObject.getJSONArray(&quot;levels&quot;);</span>
+<span class="fc" id="L57">            this.currentLevel = levels.getJSONObject(this.levelNumber - 1);</span>
+<span class="fc" id="L58">            return this.currentLevel;</span>
+        }
+<span class="nc" id="L60">        catch(Exception e){</span>
+<span class="nc" id="L61">            return new JSONObject();</span>
+        }
+    }
+    public JSONObject getCurrentLevel(){
+<span class="nc" id="L65">        return this.currentLevel;</span>
+    }
+    public float[] randomNum(){
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        for(int i = 0; i &lt; randomList.length; i++){</span>
+<span class="fc" id="L69">            randomList[i] = this.sketch.random(-30, 30);</span>
+        }
+<span class="fc" id="L71">        return randomList;</span>
+    }
+    public GameState getCurrentState(){
+<span class="nc" id="L74">        return this.currentState;</span>
+    }
+    public ArrayList&lt;float[]&gt; getTreesList(){
+<span class="fc" id="L77">        return treesList;</span>
+    }
+    public boolean[] getTreesPosition(){
+<span class="fc" id="L80">        return treesPosition;</span>
+    }
+    public void setLevels(ArrayList&lt;Level&gt; levels){
+<span class="fc" id="L83">        allLevels = levels;</span>
+<span class="fc" id="L84">    }</span>
+    public float computeAverage(int index, float[] heights){
+        //Because the heights array  is 28 max length
+<span class="fc" id="L87">        float sum = 0;</span>
+<span class="fc" id="L88">        float endPoint = index + 32;</span>
+
+        //The window is 864 x 640
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if(endPoint &gt; 896){</span>
+<span class="fc" id="L92">            endPoint = 896;</span>
+        }
+<span class="fc" id="L94">        float count = 0;</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        for(int i = index; i &lt; endPoint; i++){</span>
+<span class="fc" id="L96">            sum += heights[i];</span>
+<span class="fc" id="L97">            count++;</span>
+        }
+<span class="fc" id="L99">        return sum/count;</span>
+    }
+    public void extractTXTFile(){
+<span class="fc" id="L102">        String fileToBeParsed = this.currentLevel.getString(&quot;layout&quot;);</span>
+<span class="fc" id="L103">        String[] components = this.sketch.loadStrings(fileToBeParsed);</span>
+<span class="fc" id="L104">        float[] heights = new float[28];</span>
+        //The heights array contain height of the 28 X points
+        //Draw the map
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        for(int i = 0; i &lt; 20; i++){</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            for(int j = 0; j &lt; 28; j++){</span>
+                try {
+<span class="fc" id="L110">                    char element = components[i].charAt(j);</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">                    if(element == 'X'){</span>
+<span class="fc" id="L112">                        heights[j] = i*32;</span>
+                    }
+<span class="fc bfc" id="L114" title="All 2 branches covered.">                    else if(element == 'T'){</span>
+<span class="fc" id="L115">                        treesPosition[j] = true;</span>
+<span class="fc" id="L116">                        float randomNum  = randomList[j];</span>
+<span class="fc" id="L117">                        treesList.add(new float[]{j, i, randomNum});</span>
+                    }
+                }
+<span class="fc" id="L120">                catch(Exception e){</span>
+<span class="fc" id="L121">                }</span>
+            }
+        }
+        //Setup the rest
+<span class="fc" id="L125">        float[] firstPass = new float[896];</span>
+<span class="fc" id="L126">        float[] secondPass = new float[896];</span>
+
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        for(int i = 0; i &lt; 28; i++){</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">            for(int j = i*32; j &lt; (i + 1)*32; j++){</span>
+<span class="fc" id="L130">                averageHeight[j] = heights[i];</span>
+            }
+        }
+<span class="fc bfc" id="L133" title="All 2 branches covered.">        for(int  i = 0; i &lt; averageHeight.length; i++){</span>
+<span class="fc" id="L134">            firstPass[i] = computeAverage(i, averageHeight);</span>
+        }
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        for(int  i = 0; i &lt; averageHeight.length; i++){</span>
+<span class="fc" id="L137">            secondPass[i] = computeAverage(i, firstPass);</span>
+        }
+<span class="fc" id="L139">        averageHeight = secondPass;</span>
+        //Images
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if(this.levelNumber == 1){</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">            for(int i = 0; i &lt; 28; i++) {</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">                for (int j = 0; j &lt; 20; j++) {</span>
+                    try {
+<span class="fc" id="L145">                        char element = components[j].charAt(i);</span>
+<span class="fc" id="L146">                        String elem = String.valueOf(element);</span>
+<span class="fc bfc" id="L147" title="All 6 branches covered.">                        if (element != 'X' &amp;&amp; element != 'T' &amp;&amp; element != ' ') {</span>
+<span class="fc" id="L148">                            Tank newTank = new Tank(this.parsedJSON, this.sketch, elem, i * 32, averageHeight[i * 32], averageHeight, this.currentState);</span>
+<span class="fc" id="L149">                            this.tanksList.add(newTank);</span>
+                        }
+                    }
+<span class="fc" id="L152">                    catch (Exception e) {</span>
+<span class="fc" id="L153">                    }</span>
+                }
+            }
+
+        }
+<span class="fc" id="L158">        this.currentState = new GameState(this, this.sketch);</span>
+<span class="fc" id="L159">        this.currentState.setTankList(this.tanksList);</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        for(Tank tank: this.tanksList){</span>
+<span class="fc" id="L161">            tank.setState(this.currentState);</span>
+<span class="fc" id="L162">        }</span>
+<span class="fc" id="L163">        String assetsDir = System.getProperty(&quot;user.dir&quot;) + &quot;/src/main/resources/Tanks/&quot;;</span>
+<span class="fc" id="L164">        String backgroundImage = assetsDir + this.currentLevel.getString(&quot;background&quot;);</span>
+<span class="fc" id="L165">        String foregroundColor = this.currentLevel.getString(&quot;foreground-colour&quot;);</span>
+
+<span class="fc" id="L167">        colorList[0] = Integer.parseInt(foregroundColor.split(&quot;,&quot;)[0]);</span>
+<span class="fc" id="L168">        colorList[1] = Integer.parseInt(foregroundColor.split(&quot;,&quot;)[1]);</span>
+<span class="fc" id="L169">        colorList[2] = Integer.parseInt(foregroundColor.split(&quot;,&quot;)[2]);</span>
+<span class="fc" id="L170">        PImage treeImage = null;</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        if(this.currentLevel.has(&quot;trees&quot;)){</span>
+<span class="fc" id="L172">            String treesImagePath = assetsDir + this.currentLevel.getString(&quot;trees&quot;);</span>
+<span class="fc" id="L173">            treeImage = this.sketch.loadImage(treesImagePath);</span>
+<span class="fc" id="L174">            treeImage.resize(32, 32);</span>
+        };
+
+<span class="fc" id="L177">        PImage background = this.sketch.loadImage(backgroundImage);</span>
+<span class="fc" id="L178">        assets.add(background);</span>
+<span class="fc" id="L179">        assets.add(treeImage);</span>
+<span class="fc" id="L180">        String fuelpath = assetsDir + &quot;fuel.png&quot;;</span>
+<span class="fc" id="L181">        String parachutePath = assetsDir + &quot;parachute.png&quot;;</span>
+<span class="fc" id="L182">        String windPath = assetsDir + &quot;wind.png&quot;;</span>
+<span class="fc" id="L183">        String windPath2 = assetsDir + &quot;wind-1.png&quot;;</span>
+<span class="fc" id="L184">        String firePath =  assetsDir + &quot;fire-removebg-preview.png&quot;;</span>
+<span class="fc" id="L185">        assets2.add(this.sketch.loadImage(fuelpath));</span>
+<span class="fc" id="L186">        assets2.add(this.sketch.loadImage(parachutePath));</span>
+<span class="fc" id="L187">        assets2.add(this.sketch.loadImage(windPath));</span>
+<span class="fc" id="L188">        assets2.add(this.sketch.loadImage(windPath2));</span>
+<span class="fc" id="L189">        assets2.add(this.sketch.loadImage(firePath));</span>
+<span class="fc" id="L190">        this.currentState.setAssets(assets2);</span>
+<span class="fc" id="L191">    }</span>
+    public GameState getState(){
+<span class="fc" id="L193">        return this.currentState;</span>
+    }
+    public ArrayList&lt;PImage&gt; getAssets(){
+<span class="fc" id="L196">        return assets;</span>
+    }
+    public int[] getColorList(){
+<span class="fc" id="L199">        return colorList;</span>
+    }
+
+    public boolean isDoneLevel(){
+<span class="fc bfc" id="L203" title="All 2 branches covered.">        if(this.currentState.isGameOver()){</span>
+<span class="fc" id="L204">            isDoneLevel = true;</span>
+        }
+<span class="fc" id="L206">        return isDoneLevel;</span>
+    }
+    public void setDoneLevel(boolean value){
+<span class="fc" id="L209">        isDoneLevel = value;</span>
+<span class="fc" id="L210">    }</span>
+    public Terrain initialiseEntities(){
+<span class="fc" id="L212">        parseJSONFile();</span>
+<span class="fc" id="L213">        Terrain terrainObject = new Terrain(this.currentState, this.currentLevel, averageHeight, this.tanksList, this);</span>
+<span class="fc" id="L214">        return terrainObject;</span>
+    }
+    public ArrayList&lt;Tank&gt; getTanksList(){
+<span class="fc" id="L217">        return this.tanksList;</span>
+    }
+    public int getLevelNumber(){
+<span class="fc" id="L220">        return this.levelNumber;</span>
+    }
+    public boolean isGameOver(){
+<span class="fc bfc" id="L223" title="All 4 branches covered.">        if(this.levelNumber == allLevels.size() &amp;&amp; this.isDoneLevel()){</span>
+<span class="fc" id="L224">            return true;</span>
+        }
+<span class="fc" id="L226">        return false;</span>
+    }
+    public float[] getAverageHeight(){
+<span class="fc" id="L229">        return averageHeight;</span>
+    }
+    public Level nextLevel(){
+<span class="nc bnc" id="L232" title="All 2 branches missed.">        if(this.levelNumber &lt; allLevels.size()){</span>
+<span class="nc" id="L233">            return allLevels.get(this.levelNumber);</span>
+        }
+<span class="nc" id="L235">        return null;</span>
+    }
+    public void setTanksList(ArrayList&lt;Tank&gt; tanks){
+<span class="fc" id="L238">        this.tanksList = tanks;</span>
+<span class="fc" id="L239">    }</span>
+    public void updateTankList(){
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">        if(this.levelNumber &gt; 1) {</span>
+<span class="fc" id="L242">            this.setTanksList(this.prevLevel.getTanksList());</span>
+<span class="fc bfc" id="L243" title="All 2 branches covered.">            for (Tank tank : this.tanksList) {</span>
+<span class="fc" id="L244">                tank.resetState();</span>
+<span class="fc" id="L245">            }</span>
+        }
+<span class="fc" id="L247">        String fileToBeParsed = this.currentLevel.getString(&quot;layout&quot;);</span>
+<span class="fc" id="L248">        String[] components = this.sketch.loadStrings(fileToBeParsed);</span>
+        //if(this.levelNumber &gt; 1) {
+<span class="fc bfc" id="L250" title="All 2 branches covered.">        for (int i = 0; i &lt; 28; i++) {</span>
+<span class="fc bfc" id="L251" title="All 2 branches covered.">            for (int j = 0; j &lt; 20; j++) {</span>
+                try {
+<span class="fc" id="L253">                    char element = components[j].charAt(i);</span>
+<span class="fc" id="L254">                    String elem = String.valueOf(element);</span>
+<span class="fc bfc" id="L255" title="All 4 branches covered.">                    if (element != 'X' &amp;&amp; element != 'T') {</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">                        for(Tank tank: this.tanksList){</span>
+<span class="fc" id="L257">                            tank.setState(this.currentState);</span>
+<span class="fc bfc" id="L258" title="All 2 branches covered.">                            if(tank.getPlayerNumber().equals(elem)){</span>
+<span class="fc" id="L259">                                tank.setX(i*32);</span>
+<span class="fc" id="L260">                                tank.setY(averageHeight[i*32]);</span>
+<span class="fc" id="L261">                                tank.setAverageHeight(averageHeight);;</span>
+                            }
+<span class="fc" id="L263">                        }</span>
+                    }
+<span class="fc" id="L265">                } catch (Exception e){</span>
+
+<span class="fc" id="L267">                }</span>
+            }
+            //}
+        }
+<span class="fc" id="L271">        this.currentState.setTankList(this.tanksList);</span>
+<span class="fc" id="L272">    }</span>
+}
+    
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

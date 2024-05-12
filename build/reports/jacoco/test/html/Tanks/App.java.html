@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>App.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tanks_scaffold (1)</a> &gt; <a href="index.source.html" class="el_package">Tanks</a> &gt; <span class="el_source">App.java</span></div><h1>App.java</h1><pre class="source lang-java linenums">package Tanks;
+
+import org.checkerframework.checker.units.qual.A;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import processing.core.PApplet;
+import processing.core.PConstants;
+import processing.core.PImage;
+import processing.event.KeyEvent;
+import processing.event.MouseEvent;
+
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+
+public class App extends PApplet {
+    public static final int CELLSIZE = 32; //8;
+    public static final int CELLHEIGHT = 32;
+
+    public static final int CELLAVG = 32;
+<span class="fc" id="L26">    int index = 0;</span>
+    public static final int TOPBAR = 0;
+<span class="fc" id="L28">    private int start = 0;</span>
+<span class="fc" id="L29">    public static int WIDTH = 864; //CELLSIZE*BOARD_WIDTH;</span>
+<span class="fc" id="L30">    public static int HEIGHT = 640; //BOARD_HEIGHT*CELLSIZE+TOPBAR;</span>
+<span class="fc" id="L31">    public static final int BOARD_WIDTH = WIDTH/CELLSIZE;</span>
+    public static final int BOARD_HEIGHT = 20;
+    private ArrayList&lt;Tank&gt; tankArray;
+<span class="fc" id="L34">    private ArrayList&lt;Tank&gt; tanksList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L35">    private int transitionTime = 0;</span>
+<span class="fc" id="L36">    private int endTime = 700;</span>
+    private Level testLevel; private Level testLevel2;; private Level testLevel3;
+
+    public static final int INITIAL_PARACHUTES = 1;
+
+    public static final int FPS = 30;
+<span class="fc" id="L42">    float initialPoint = 190;</span>
+<span class="fc" id="L43">    private int startTime = 0;</span>
+    private int len;
+    public String configPath;
+<span class="fc" id="L46">    ArrayList&lt;Level&gt; allLevels = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L47">    ArrayList&lt;Terrain&gt; allTerrains = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L49">    public static Random random = new Random();</span>
+	
+	// Feel free to add any additional methods or attributes you want. Please put classes in different files.
+
+<span class="fc" id="L53">    public App() {</span>
+<span class="fc" id="L54">        this.configPath = &quot;config.json&quot;;</span>
+<span class="fc" id="L55">    }</span>
+
+    /**
+     * Initialise the setting of the window size.
+     */
+	@Override
+    public void settings() {
+<span class="fc" id="L62">        size(WIDTH, HEIGHT);</span>
+<span class="fc" id="L63">    }</span>
+
+    /**
+     * Load all resources such as images. Initialise the elements such as the player and map elements.
+     */
+	@Override
+    public void setup() {
+<span class="fc" id="L70">        frameRate(FPS);</span>
+<span class="fc" id="L71">        index  = 0;</span>
+<span class="fc" id="L72">        String content = null;</span>
+        try {
+<span class="fc" id="L74">            content = new String(Files.readAllBytes(Paths.get(this.configPath)));</span>
+<span class="nc" id="L75">        } catch (IOException e) {</span>
+<span class="nc" id="L76">            throw new RuntimeException(e);</span>
+<span class="fc" id="L77">        }</span>
+        //Parse the content into a JSON object;
+<span class="fc" id="L79">        org.json.JSONObject jsonObject = new JSONObject(content);</span>
+<span class="fc" id="L80">        JSONObject parsedJSON = jsonObject;</span>
+        //The levels array in the config.json file
+<span class="fc" id="L82">        JSONArray levels = jsonObject.getJSONArray(&quot;levels&quot;);</span>
+<span class="fc" id="L83">        int initialLevel = 1;</span>
+<span class="fc" id="L84">        Level prev = null;</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        for(int i = 0; i &lt; levels.length(); i++){</span>
+<span class="fc" id="L86">            Level newLevel = null;</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">            if(i == 0) {</span>
+<span class="fc" id="L88">                newLevel = new Level(this, this.configPath, initialLevel++, null);</span>
+            }
+            else{
+                //If the current level is &gt; level 1
+<span class="fc" id="L92">                newLevel = new Level(this, this.configPath, initialLevel++, prev);</span>
+            }
+<span class="fc" id="L94">            prev = newLevel;</span>
+<span class="fc" id="L95">            allLevels.add(newLevel);</span>
+<span class="fc" id="L96">            Terrain newTerrain = newLevel.initialiseEntities();</span>
+<span class="fc" id="L97">            allTerrains.add(newTerrain);</span>
+<span class="fc" id="L98">            len = allLevels.size();</span>
+        }
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        for(Level level: allLevels){</span>
+<span class="fc" id="L101">            level.setLevels(allLevels);</span>
+<span class="fc" id="L102">        }</span>
+
+<span class="fc" id="L104">    }</span>
+
+    public Level getCurrentLevel(){
+<span class="fc" id="L107">        return allLevels.get(index);</span>
+    }
+
+
+    /**
+     * Receive key pressed signal from the keyboard.
+     */
+	@Override
+    public void keyPressed(KeyEvent event){
+<span class="fc bfc" id="L116" title="All 2 branches covered.">        for (Tank tank : new ArrayList&lt;&gt;(allLevels.get(index).getTanksList())) {</span>
+<span class="pc bpc" id="L117" title="1 of 4 branches missed.">            if (tank.isThisPlayerTurn() &amp;&amp; allTerrains.get(index).getAverageHeight()[tank.getX()] &lt;= tank.getY()) {</span>
+<span class="fc bfc" id="L118" title="All 4 branches covered.">                if(event.getKeyCode() == 38 || event.getKeyCode() == 40){</span>
+<span class="fc" id="L119">                    tank.updateTurret(1.0f/this.frameRate, this, event.getKeyCode());</span>
+                }
+<span class="fc bfc" id="L121" title="All 4 branches covered.">                if(event.getKeyCode() == PConstants.RIGHT || event.getKeyCode() == PConstants.LEFT){</span>
+<span class="fc" id="L122">                    tank.updateMovement(1.0f/this.frameRate, this, event.getKeyCode());</span>
+                }
+<span class="fc bfc" id="L124" title="All 4 branches covered.">                if(event.getKey() == 'w' || event.getKey() == 's'){</span>
+<span class="fc" id="L125">                    tank.updatePower(this, event.getKey());</span>
+                }
+<span class="fc bfc" id="L127" title="All 6 branches covered.">                if(event.getKey() == 'f' || event.getKey() == 'r' &amp;&amp; !allLevels.get(index).isGameOver()){</span>
+<span class="fc" id="L128">                    tank.powerUps(this, event.getKey());</span>
+                }
+<span class="fc bfc" id="L130" title="All 2 branches covered.">                if(event.getKey() == ' '){</span>
+<span class="fc" id="L131">                    tank.fireProjectile(this, event.getKey());</span>
+                }
+<span class="fc bfc" id="L133" title="All 4 branches covered.">                if(event.getKey() == 'r' &amp;&amp; allLevels.get(index).isGameOver()){</span>
+<span class="fc" id="L134">                    allLevels.clear();</span>
+<span class="fc" id="L135">                    allTerrains.clear();</span>
+
+<span class="fc" id="L137">                    this.setup();</span>
+                }
+            }
+<span class="fc" id="L140">        }</span>
+<span class="fc" id="L141">    }</span>
+
+    /**
+     * Receive key released signal from the keyboard.
+     */
+	@Override
+    public void keyReleased(){
+
+<span class="nc" id="L149">    }</span>
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        //TODO - powerups, like repair and extra fuel and teleport
+<span class="nc" id="L154">    }</span>
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+<span class="nc" id="L158">    }</span>
+
+    /**
+     * Draw all elements in the game by current frame.
+     */
+
+<span class="fc" id="L164">    int idx = 0;</span>
+	@Override
+    public void draw() {
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        if(index &gt;= allLevels.size() - 1){</span>
+<span class="fc" id="L168">            index = allLevels.size() - 1;</span>
+        }
+<span class="fc bfc" id="L170" title="All 2 branches covered.">        if(index &lt; 0){</span>
+<span class="fc" id="L171">            index = 0;</span>
+        }
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        if(allLevels.isEmpty()){</span>
+<span class="fc" id="L174">            this.setup();</span>
+        }
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        if (allLevels.get(index).isGameOver()) {</span>
+<span class="fc" id="L177">            Level currentLevel = allLevels.get(index);</span>
+<span class="fc" id="L178">            allTerrains.get(index).renderTerrain(this, currentLevel.getTreesList(), currentLevel.getTreesPosition(), currentLevel.getAssets(), currentLevel.getColorList());</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">        } else if (!allLevels.get(index).isDoneLevel()) {</span>
+<span class="fc" id="L180">            Level level = allLevels.get(index);</span>
+<span class="fc" id="L181">            allTerrains.get(index).renderTerrain(this, level.getTreesList(), level.getTreesPosition(), level.getAssets(), level.getColorList());</span>
+<span class="pc bpc" id="L182" title="1 of 4 branches missed.">        } else if (allLevels.get(index).isDoneLevel() &amp;&amp; !allLevels.get(index).isGameOver()) {</span>
+<span class="fc" id="L183">            index++;</span>
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">            if (index &lt; allLevels.size()) {</span>
+<span class="fc" id="L185">                Level level = allLevels.get(index);</span>
+<span class="fc" id="L186">                level.updateTankList();</span>
+<span class="fc" id="L187">                Terrain currentTerrain = allTerrains.get(index);</span>
+<span class="fc" id="L188">                currentTerrain.setTanks(level.getTanksList());</span>
+                ;
+<span class="fc" id="L190">                currentTerrain.setState(level.getState());</span>
+                ;
+            }
+    }
+<span class="fc" id="L194">    }</span>
+    public void setConfigPath(String newConfigPath){
+<span class="fc" id="L196">        this.configPath = newConfigPath;</span>
+<span class="fc" id="L197">    }</span>
+
+    public static void main(String[] args) {
+<span class="nc" id="L200">        PApplet.main(&quot;Tanks.App&quot;);</span>
+<span class="nc" id="L201">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

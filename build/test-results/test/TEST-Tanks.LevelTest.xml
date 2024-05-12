@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Tanks.LevelTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2024-05-12T06:22:00" hostname="LAPTOP-2SI78J1K" time="27.818">
+  <properties/>
+  <testcase name="testResetGame()" classname="Tanks.LevelTest" time="6.428"/>
+  <testcase name="testGameOver()" classname="Tanks.LevelTest" time="7.128"/>
+  <testcase name="testUpdateTankList()" classname="Tanks.LevelTest" time="3.032"/>
+  <testcase name="testAssetsLoading()" classname="Tanks.LevelTest" time="1.024"/>
+  <testcase name="testComputeAverage()" classname="Tanks.LevelTest" time="1.018"/>
+  <testcase name="testParseJSONFile()" classname="Tanks.LevelTest" time="1.13"/>
+  <testcase name="testInitialiseTerrain()" classname="Tanks.LevelTest" time="1.029"/>
+  <testcase name="testTransitionLevel()" classname="Tanks.LevelTest" time="7.025"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

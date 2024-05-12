@@ -45,6 +45,12 @@ test {
     // Use junit platform for unit tests
     useJUnitPlatform()
     ignoreFailures = true
+    include '**/*Test.class'  // This includes all test classes ending with 'Test'
+    testLogging {
+        showStandardStreams = true
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
 }
 
 jar {

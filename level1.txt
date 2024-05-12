@@ -11,12 +11,11 @@
    TT        X  X   C
  XAXX       X      TX   DX
   X  XT   X   X    X X  X  X
-X     X E              T  X
+X     X                T  X
        XT  X      X    X
         X             X
 
          T
          X
-		 
-		 
-		 
+
+
