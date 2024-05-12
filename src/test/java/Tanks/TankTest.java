@@ -31,10 +31,7 @@ public class TankTest {
         assertEquals(tank.getProjectile().size(), 5, "When a tank hits the ultimate, it should fire 5 bullets at the same time");
         sketch.delay(2000);
     }
-    @Test
-    public void testRandomColour(){
 
-    }
     @Test
     public void testUpdateTurret(){
         App sketch = new App();
@@ -56,7 +53,6 @@ public class TankTest {
 
         //2 clicks so 6/30 radian;
         assertEquals(currentAngle - 6.0/30, tank.getAngle(), 0.01, "Tank's turret rotate wrongly");
-
         sketch.noLoop();
     }
 
@@ -118,7 +114,7 @@ public class TankTest {
         sketch.dispose();
     }
     @Test
-    public void testMovementToBoundaryLeft(){
+    public void testMovementToBoundary(){
         App sketch = new App();
         sketch.loop();
         PApplet.runSketch(new String[]{"App"}, sketch);
@@ -132,18 +128,6 @@ public class TankTest {
             sketch.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', PConstants.LEFT));
         }
         assertEquals(0, tank.getX(), "Tank should not move below 0 coordinate");
-        sketch.noLoop();
-        sketch.dispose();
-    }
-    @Test
-    public void testMovementToBoundaryRight(){
-        App sketch = new App();
-        sketch.loop();
-        PApplet.runSketch(new String[]{"App"}, sketch);
-        sketch.delay(1000);
-        Level level1 = sketch.allLevels.get(0);
-        Terrain terrain = level1.initialiseEntities();
-        Tank tank = terrain.getTankList().get(0);
         tank.setX(858);
         tank.setY(terrain.getAverageHeight()[858]);
         for(int i = 0; i < 7; i++){
@@ -154,7 +138,7 @@ public class TankTest {
         sketch.dispose();
     }
     @Test
-    public void testUpdateTurretToBoundaryLeft(){
+    public void testUpdateTurretToBoundary(){
         App sketch = new App();
         sketch.loop();
         PApplet.runSketch(new String[]{"App"}, sketch);
@@ -169,24 +153,12 @@ public class TankTest {
         }
         float difference = abs(PConstants.HALF_PI - tank.getAngle());
         assertTrue(difference <= 0.15, "Turret should only rotate 180 degrees");
-        sketch.noLoop();
-        sketch.dispose();
-    }
-    @Test
-    public void testUpdateTurretToBoundaryRight(){
-        App sketch = new App();
-        sketch.loop();
-        PApplet.runSketch(new String[]{"App"}, sketch);
-        sketch.delay(1000);
-        Level level1 = sketch.allLevels.get(0);
-        Terrain terrain = level1.initialiseEntities();
-        Tank tank = terrain.getTankList().get(0);
         tank.setAngle(-1.5F);
         for(int i = 0; i < 20; i++){
             sketch.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', PConstants.DOWN));
         }
-        float difference = abs(-PConstants.HALF_PI - tank.getAngle());
-        assertTrue(difference <= 0.15, "Turret should only rotate 180 degrees");
+        float diff = abs(-PConstants.HALF_PI - tank.getAngle());
+        assertTrue(diff <= 0.15, "Turret should only rotate 180 degrees");
         sketch.noLoop();
         sketch.dispose();
     }
@@ -258,10 +230,8 @@ public class TankTest {
         sketch.noLoop();
         sketch.dispose();
     }
-
-
     @Test
-    public void testPowerUpExceedBoundary(){
+    public void testPowerUpExceedInValid(){
         App sketch = new App();
         sketch.loop();
         PApplet.runSketch(new String[]{"App"}, sketch);
@@ -275,30 +245,16 @@ public class TankTest {
         sketch.keyPressed(new KeyEvent(null, 0, 0, 0, 'r', 0));
         assertEquals(100, tank.getHealth(), "Tank's health should not exist 100");
         assertEquals(1, tank.getPoint(), "Point is decreased incorrectly");
-        sketch.noLoop();
-        sketch.dispose();
-    }
-    @Test
-    public void testPowerUpsWithInsufficientPoint(){
-        App sketch = new App();
-        sketch.loop();
-        PApplet.runSketch(new String[]{"App"}, sketch);
-        sketch.delay(1000);
-        Level level1 = sketch.allLevels.get(0);
-        Terrain terrain = level1.initialiseEntities();
-        Tank tank = terrain.getTankList().get(0);
         int initialHealth = tank.getHealth();
         int initialFuel = tank.getFuel();
         tank.setPoint(9);
         sketch.keyPressed(new KeyEvent(null, 0, 0, 0, 'r', 0));
-
         assertEquals(initialHealth, tank.getHealth());
         sketch.keyPressed(new KeyEvent(null, 0, 0, 0, 'f', 0));
         assertEquals(initialFuel, tank.getFuel());
         assertEquals(9, tank.getPoint());
         sketch.noLoop();
         sketch.dispose();
-
     }
     @Test
     public void testWithIrrelevantKey(){
@@ -322,7 +278,6 @@ public class TankTest {
         assertEquals(initialHealth, tank.getHealth());
         sketch.noLoop();
         sketch.dispose();
-
     }
     @Test
     public void testMovementWithNoFuel()

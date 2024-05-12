@@ -25,195 +25,251 @@ public class Terrain {
     private boolean[] hasUpdated;
     ArrayList&lt;Explosion&gt; handleDraw;
     Level currentLevel;
-<span class="fc" id="L28">    public Terrain (GameState gameState, JSONObject layoutSetting, float[] averageHeight, ArrayList&lt;Tank&gt; tanksList, Level level){</span>
-<span class="fc" id="L29">        this.gameState = gameState;</span>
-<span class="fc" id="L30">        this.averageHeight = averageHeight;</span>
-<span class="fc" id="L31">        this.tanksList = tanksList;</span>
-<span class="fc" id="L32">        this.destruction = new HashSet&lt;&gt;();</span>
-<span class="fc" id="L33">        currentLevel = level;</span>
-<span class="fc" id="L34">        hasDead = new boolean[this.tanksList.size()];</span>
-<span class="fc" id="L35">        hasUpdated = new boolean[this.tanksList.size()];</span>
-<span class="fc" id="L36">        Arrays.fill(hasDead, false);</span>
-<span class="fc" id="L37">        handleDraw = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L38">    }</span>
+    /**
+     * Constructs a Terrain object with a specified game state, layout setting, height data, list of tanks, and the current level.
+     *
+     * @param gameState The game state associated with this terrain.
+     * @param averageHeight An array of float representing the height of terrain at each horizontal pixel.
+     * @param tanksList A list of tanks currently active on this terrain.
+     * @param level The current level object associated with this terrain.
+     */
+<span class="fc" id="L36">    public Terrain (GameState gameState, float[] averageHeight, ArrayList&lt;Tank&gt; tanksList, Level level){</span>
+<span class="fc" id="L37">        this.gameState = gameState;</span>
+<span class="fc" id="L38">        this.averageHeight = averageHeight;</span>
+<span class="fc" id="L39">        this.tanksList = tanksList;</span>
+<span class="fc" id="L40">        this.destruction = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L41">        currentLevel = level;</span>
+<span class="fc" id="L42">        hasDead = new boolean[this.tanksList.size()];</span>
+<span class="fc" id="L43">        hasUpdated = new boolean[this.tanksList.size()];</span>
+<span class="fc" id="L44">        Arrays.fill(hasDead, false);</span>
+<span class="fc" id="L45">        handleDraw = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L46">    }</span>
+
+    /**
+     * Returns the average height data of this terrain
+     * @return  a float array represents the height at each point in this terrain
+     */
     public float[] getAverageHeight(){
-<span class="fc" id="L40">        return this.averageHeight;</span>
+<span class="fc" id="L53">        return this.averageHeight;</span>
     }
+
+    /**
+     * Calculates the impact of a explosion in the terrain
+     * @param x, x coordinate of the terrain
+     * @param y, y coordinate of terrain
+     * @param centerX, x coordinate of the explosion
+     * @param centerY, y coordinate of explosion
+     * @return teh distance from the center of the explosion
+     */
     public double calculateImpactRange(float x, float y, float centerX, float centerY){
-<span class="fc" id="L43">        return (Math.pow(centerX-x,2) + Math.pow(centerY-y,2));</span>
+<span class="fc" id="L65">        return (Math.pow(centerX-x,2) + Math.pow(centerY-y,2));</span>
     }
 
+    /**
+     * Update the tank's properties based on the destruction in the terrain
+     * @param destruction, a set of destruction's to handle
+     */
     public void updateTank(HashSet&lt;Explosion&gt; destruction){
-<span class="fc bfc" id="L47" title="All 2 branches covered.">        for(Explosion explosion: destruction) {</span>
-<span class="fc" id="L48">            int centerX = (int) explosion.getX();</span>
-<span class="fc" id="L49">            float centerY = explosion.getY();</span>
-<span class="fc" id="L50">            float radius = explosion.getRadius();</span>
-<span class="fc" id="L51">            Tank tankCausation = explosion.getTank();</span>
-<span class="fc bfc" id="L52" title="All 2 branches covered.">            for (int i = 0; i &lt; this.tanksList.size(); i++) {</span>
-<span class="fc" id="L53">                Tank tank = this.tanksList.get(i);</span>
-<span class="fc" id="L54">                int tankX = tank.getX();</span>
-<span class="fc" id="L55">                float tankY = tank.getY();</span>
-<span class="fc" id="L56">                double distance = calculateImpactRange(tankX, tankY, centerX, centerY);</span>
-<span class="fc" id="L57">                double trueDistance = Math.sqrt(distance);</span>
-<span class="fc" id="L58">                double damage = 0;</span>
-<span class="fc bfc" id="L59" title="All 4 branches covered.">                if(trueDistance &lt;= radius &amp;&amp; tank.getHealth() &gt; 0){</span>
-<span class="fc" id="L60">                    damage = (1 - trueDistance/radius)*60;</span>
-<span class="fc" id="L61">                    tank.setHealth(tank.getHealth() - (int) damage);</span>
-<span class="fc bfc" id="L62" title="All 2 branches covered.">                    if(tank != tankCausation) {</span>
-<span class="fc" id="L63">                        tankCausation.setPoint(tankCausation.getPoint() + (int) damage);</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        for(Explosion explosion: destruction) {</span>
+<span class="fc" id="L74">            int centerX = explosion.getX();</span>
+<span class="fc" id="L75">            float centerY = explosion.getY();</span>
+<span class="fc" id="L76">            float radius = explosion.getRadius();</span>
+<span class="fc" id="L77">            Tank tankCausation = explosion.getTank();</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">            for (int i = 0; i &lt; this.tanksList.size(); i++) {</span>
+<span class="fc" id="L79">                Tank tank = this.tanksList.get(i);</span>
+<span class="fc" id="L80">                int tankX = tank.getX();</span>
+<span class="fc" id="L81">                float tankY = tank.getY();</span>
+<span class="fc" id="L82">                double distance = calculateImpactRange(tankX, tankY, centerX, centerY);</span>
+<span class="fc" id="L83">                double trueDistance = Math.sqrt(distance);</span>
+<span class="fc" id="L84">                double damage = 0;</span>
+<span class="pc bpc" id="L85" title="1 of 4 branches missed.">                if(trueDistance &lt;= radius &amp;&amp; tank.getHealth() &gt; 0){</span>
+<span class="fc" id="L86">                    damage = (1 - trueDistance/radius)*60;</span>
+<span class="fc" id="L87">                    tank.setHealth(tank.getHealth() - (int) damage);</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">                    if(tank != tankCausation) {</span>
+<span class="fc" id="L89">                        tankCausation.setPoint(tankCausation.getPoint() + (int) damage);</span>
                     }
                 }
             }
-<span class="fc" id="L67">        }</span>
-<span class="fc" id="L68">    }</span>
-    public void setDestruction(HashSet&lt;Explosion&gt; destruction){
-<span class="nc" id="L70">        this.destruction = destruction;</span>
-<span class="nc" id="L71">    }</span>
+<span class="fc" id="L93">        }</span>
+<span class="fc" id="L94">    }</span>
+
+    /**
+     * Update the terrain's height at coordinates that are affected by the explosion in the terrain
+     * @param destruction,  a set of destruction's to handle
+     */
     public void updateTerrain(HashSet&lt;Explosion&gt; destruction){
-<span class="fc bfc" id="L73" title="All 2 branches covered.">        for(Explosion e: destruction){</span>
-<span class="fc" id="L74">            int centerX = (int) e.getX();</span>
-<span class="fc" id="L75">            float centerY = e.getY();</span>
-<span class="fc" id="L76">            float radius = e.getRadius();</span>
-<span class="fc" id="L77">            int start = Math.max(0, (int)  (centerX - radius));</span>
-<span class="fc" id="L78">            int end = Math.min(864, (int) (centerX + radius));</span>
-<span class="fc bfc" id="L79" title="All 2 branches covered.">            for(int i = start; i &lt; end; i++) {</span>
-<span class="fc" id="L80">                float distance = (float) Math.sqrt(Math.pow(radius, 2) - Math.pow(centerX - i, 2));</span>
-<span class="fc bfc" id="L81" title="All 2 branches covered.">                if (this.averageHeight[i] &lt; centerY - distance){</span>
-<span class="fc" id="L82">                    this.averageHeight[i] += 2 * distance;</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">        for(Explosion e: destruction){</span>
+<span class="fc" id="L102">            int centerX = (int) e.getX();</span>
+<span class="fc" id="L103">            float centerY = e.getY();</span>
+<span class="fc" id="L104">            float radius = e.getRadius();</span>
+<span class="fc" id="L105">            int start = Math.max(0, (int)  (centerX - radius));</span>
+<span class="fc" id="L106">            int end = Math.min(864, (int) (centerX + radius));</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">            for(int i = start; i &lt; end; i++) {</span>
+<span class="fc" id="L108">                float distance = (float) Math.sqrt(Math.pow(radius, 2) - Math.pow(centerX - i, 2));</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">                if (this.averageHeight[i] &lt; centerY - distance){</span>
+<span class="fc" id="L110">                    this.averageHeight[i] += 2 * distance;</span>
                 }
-<span class="pc bpc" id="L84" title="1 of 4 branches missed.">                else if (this.averageHeight[i] &gt;= centerY - distance &amp;&amp; this.averageHeight[i] &lt;= centerY + distance) {</span>
-<span class="fc" id="L85">                    this.averageHeight[i] = centerY + distance;</span>
+<span class="pc bpc" id="L112" title="1 of 4 branches missed.">                else if (this.averageHeight[i] &gt;= centerY - distance &amp;&amp; this.averageHeight[i] &lt;= centerY + distance) {</span>
+<span class="fc" id="L113">                    this.averageHeight[i] = centerY + distance;</span>
                 }
 
             }
-<span class="fc" id="L89">        }</span>
-<span class="fc" id="L90">    }</span>
+<span class="fc" id="L117">        }</span>
+<span class="fc" id="L118">    }</span>
 
+    /**
+     * draw any explosion that has not completed the animation in the terrain
+     */
     public void drawExplosion(){
-<span class="fc" id="L93">        Iterator&lt;Explosion&gt; it = handleDraw.iterator();</span>
-<span class="fc bfc" id="L94" title="All 2 branches covered.">        while(it.hasNext()){</span>
-<span class="fc" id="L95">            Explosion nextExplosion = it.next();</span>
-<span class="fc bfc" id="L96" title="All 2 branches covered.">            if(!nextExplosion.isHasDoneExplode()){</span>
-<span class="fc" id="L97">                nextExplosion.drawExplosion();</span>
+<span class="fc" id="L124">        Iterator&lt;Explosion&gt; it = handleDraw.iterator();</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        while(it.hasNext()){</span>
+<span class="fc" id="L126">            Explosion nextExplosion = it.next();</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">            if(!nextExplosion.isHasDoneExplode()){</span>
+<span class="fc" id="L128">                nextExplosion.drawExplosion();</span>
             }
             else{
-<span class="fc" id="L100">                it.remove();</span>
+<span class="fc" id="L131">                it.remove();</span>
             }
-<span class="fc" id="L102">        }</span>
-<span class="fc" id="L103">    }</span>
-    public void updateTankHeight(PApplet sketch){
-<span class="fc" id="L105">        ArrayList&lt;Explosion&gt; destruct = new ArrayList&lt;&gt;(this.destruction);</span>
-<span class="fc" id="L106">        Explosion explosion = null;</span>
-<span class="fc" id="L107">        Tank tankCause = null;</span>
-<span class="fc bfc" id="L108" title="All 2 branches covered.">        if(!destruct.isEmpty()){</span>
-<span class="fc" id="L109">            explosion  = destruct.get(0);</span>
-<span class="fc" id="L110">            tankCause = explosion.getTank();</span>
-        }
-<span class="fc bfc" id="L112" title="All 2 branches covered.">        for(Tank tank: this.tanksList){</span>
-<span class="fc" id="L113">            int xTank = tank.getX();</span>
-<span class="fc" id="L114">            float newY = this.averageHeight[xTank];</span>
-<span class="fc bfc" id="L115" title="All 2 branches covered.">            if(newY != tank.getY()) {</span>
-<span class="fc" id="L116">                int damage = (int) (newY - tank.getY());</span>
-<span class="pc bpc" id="L117" title="1 of 6 branches missed.">                if((tank.getParachuteCount() == 0 || tank.getY() &gt;= 640) &amp;&amp; !hasUpdated[this.tanksList.indexOf(tank)]) {</span>
-<span class="fc" id="L118">                    hasUpdated[this.tanksList.indexOf(tank)] = true;</span>
-<span class="pc bpc" id="L119" title="4 of 10 branches missed.">                    if (tankCause != null &amp;&amp; tankCause != tank &amp;&amp; (tank.getHealth() &gt; 0) &amp;&amp; tank.getX() &lt;= explosion.getX() + explosion.getRadius() &amp;&amp; tank.getX() &gt;= explosion.getX() - explosion.getRadius()){</span>
-<span class="fc" id="L120">                        tankCause.setPoint(tankCause.getPoint() + damage);</span>
-                    }
-<span class="fc" id="L122">                    tank.setHealth(tank.getHealth() - damage);</span>
-                }
-<span class="fc" id="L124">                tank.reduceY(1.0f / sketch.frameRate, newY);</span>
-<span class="fc" id="L125">            }</span>
-            else{
-<span class="fc" id="L127">                hasUpdated[this.tanksList.indexOf(tank)] = false;</span>
-            }
-<span class="fc" id="L129">        }</span>
-<span class="fc bfc" id="L130" title="All 2 branches covered.">        for(Tank tank: this.tanksList){</span>
-<span class="fc" id="L131">            tank.setAverageHeight(this.averageHeight);</span>
-<span class="fc" id="L132">        }</span>
-<span class="fc" id="L133">        this.destruction.clear();</span>
+<span class="fc" id="L133">        }</span>
 <span class="fc" id="L134">    }</span>
-    public void setHeight(int index, float newValue){
-<span class="nc" id="L136">        this.averageHeight[index] = newValue;</span>
-<span class="nc" id="L137">    }</span>
+
+    /**
+     * Set the height of the tank to new height if the terrain is destroyed, also check whether the tank has been deduced health by falling
+     * @param sketch
+     */
+    public void updateTankHeight(PApplet sketch){
+<span class="fc" id="L141">        ArrayList&lt;Explosion&gt; destruct = new ArrayList&lt;&gt;(this.destruction);</span>
+<span class="fc" id="L142">        Explosion explosion = null;</span>
+<span class="fc" id="L143">        Tank tankCause = null;</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">        if(!destruct.isEmpty()){</span>
+<span class="fc" id="L145">            explosion  = destruct.get(0);</span>
+<span class="fc" id="L146">            tankCause = explosion.getTank();</span>
+        }
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        for(Tank tank: this.tanksList){</span>
+<span class="fc" id="L149">            int xTank = tank.getX();</span>
+<span class="fc" id="L150">            float newY = this.averageHeight[xTank];</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">            if(newY != tank.getY()) {</span>
+<span class="fc" id="L152">                int damage = (int) (newY - tank.getY());</span>
+<span class="pc bpc" id="L153" title="1 of 6 branches missed.">                if((tank.getParachuteCount() == 0 || tank.getY() &gt;= 640) &amp;&amp; !hasUpdated[this.tanksList.indexOf(tank)]) {</span>
+<span class="fc" id="L154">                    hasUpdated[this.tanksList.indexOf(tank)] = true;</span>
+<span class="pc bpc" id="L155" title="4 of 10 branches missed.">                    if (tankCause != null &amp;&amp; tankCause != tank &amp;&amp; (tank.getHealth() &gt; 0) &amp;&amp; tank.getX() &lt;= explosion.getX() + explosion.getRadius() &amp;&amp; tank.getX() &gt;= explosion.getX() - explosion.getRadius()){</span>
+<span class="fc" id="L156">                        tankCause.setPoint(tankCause.getPoint() + damage);</span>
+                    }
+<span class="fc" id="L158">                    tank.setHealth(tank.getHealth() - damage);</span>
+                }
+<span class="fc" id="L160">                tank.reduceY(1.0f / sketch.frameRate, newY);</span>
+<span class="fc" id="L161">            }</span>
+            else{
+<span class="fc" id="L163">                hasUpdated[this.tanksList.indexOf(tank)] = false;</span>
+            }
+<span class="fc" id="L165">        }</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        for(Tank tank: this.tanksList){</span>
+<span class="fc" id="L167">            tank.setAverageHeight(this.averageHeight);</span>
+<span class="fc" id="L168">        }</span>
+<span class="fc" id="L169">        this.destruction.clear();</span>
+<span class="fc" id="L170">    }</span>
+    /**
+     * When a level is transited, update the tanks active in this terrain.
+     * @param tanks, a new ArrayList of Tank object.
+     */
     public void setTanks(ArrayList&lt;Tank&gt; tanks){
-<span class="fc" id="L139">        this.tanksList = tanks;</span>
-<span class="fc" id="L140">    }</span>
+<span class="fc" id="L176">        this.tanksList = tanks;</span>
+<span class="fc" id="L177">    }</span>
+    /**
+     * Set the game state associated with this terrain
+     * @param newState, a GameState object.
+     */
     public void setState(GameState newState){
-<span class="fc" id="L142">        this.gameState = newState;</span>
-<span class="fc" id="L143">    }</span>
+<span class="fc" id="L183">        this.gameState = newState;</span>
+<span class="fc" id="L184">    }</span>
+    /**
+     * Get the tanks that are displayed on this terrain
+     * @return an ArrayList of Tank object
+     */
     public ArrayList&lt;Tank&gt; getTankList(){
-<span class="fc" id="L145">        return this.tanksList;</span>
+<span class="fc" id="L190">        return this.tanksList;</span>
     }
-    public ArrayList&lt;Explosion&gt; getDestruction(){
-<span class="nc" id="L148">        return new ArrayList&lt;&gt;(this.destruction);</span>
-    }
+    /**
+     * adjust the height of the terrain at any specific point
+     * @param index, the x coordinate want to be changed
+     * @param newY, the new y coordinate at the point.
+     */
     public void setTerrain(int index, float newY){
-<span class="nc" id="L151">        this.averageHeight[index] = newY;</span>
-<span class="nc" id="L152">    }</span>
+<span class="fc" id="L198">        this.averageHeight[index] = newY;</span>
+<span class="fc" id="L199">    }</span>
+    /**
+     * Renders the terrain including tanks, explosions, and other elements.
+     *
+     * @param sketch The PApplet used for drawing.
+     * @param treesList A list of tree coordinates and modifications.
+     * @param treesPosition A boolean array indicating the presence of trees.
+     * @param assets A list of PImages used as visual assets.
+     * @param colorList An array of color values for drawing.
+     */
     public void renderTerrain(PApplet sketch, ArrayList&lt;float[]&gt; treesList, boolean[] treesPosition, ArrayList&lt;PImage&gt; assets, int[] colorList){
-<span class="fc" id="L154">            sketch.image(assets.get(0), 0, 0);</span>
-<span class="fc bfc" id="L155" title="All 2 branches covered.">            if(hasUpdated.length != this.tanksList.size()){</span>
-<span class="fc" id="L156">                hasUpdated = new boolean[this.tanksList.size()];</span>
-<span class="fc" id="L157">                Arrays.fill(hasUpdated, false);</span>
+<span class="fc" id="L210">            sketch.image(assets.get(0), 0, 0);</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">            if(hasUpdated.length != this.tanksList.size()){</span>
+<span class="fc" id="L212">                hasUpdated = new boolean[this.tanksList.size()];</span>
+<span class="fc" id="L213">                Arrays.fill(hasUpdated, false);</span>
             }
             //DRAW THE MAP
-<span class="fc" id="L160">            drawExplosion();</span>
-<span class="fc" id="L161">            updateTerrain(this.destruction);</span>
-<span class="fc" id="L162">            updateTank(this.destruction);</span>
-<span class="fc" id="L163">            this.updateTankHeight(sketch);</span>
-<span class="fc bfc" id="L164" title="All 2 branches covered.">            for (int i = 0; i &lt; this.averageHeight.length; i++) {</span>
-<span class="fc" id="L165">                sketch.stroke(colorList[0], colorList[1], colorList[2]);</span>
-<span class="fc" id="L166">                sketch.rect(i, this.averageHeight[i], 1, 640 - this.averageHeight[i]);</span>
+<span class="fc" id="L216">            drawExplosion();</span>
+<span class="fc" id="L217">            updateTerrain(this.destruction);</span>
+<span class="fc" id="L218">            updateTank(this.destruction);</span>
+<span class="fc" id="L219">            this.updateTankHeight(sketch);</span>
+<span class="fc bfc" id="L220" title="All 2 branches covered.">            for (int i = 0; i &lt; this.averageHeight.length; i++) {</span>
+<span class="fc" id="L221">                sketch.stroke(colorList[0], colorList[1], colorList[2]);</span>
+<span class="fc" id="L222">                sketch.rect(i, this.averageHeight[i], 1, 640 - this.averageHeight[i]);</span>
             }
-<span class="fc bfc" id="L168" title="All 2 branches covered.">            for (int i = 0; i &lt; treesList.size(); i++) {</span>
-<span class="fc" id="L169">                int x = (int) treesList.get(i)[0]; // toa do x</span>
-<span class="fc" id="L170">                float randomNum = treesList.get(i)[2];</span>
-<span class="fc" id="L171">                int imageHeight = assets.get(1).height;</span>
-<span class="pc bpc" id="L172" title="1 of 2 branches missed.">                if (treesPosition[x]) { //which denotes there's a tree there</span>
-<span class="fc" id="L173">                    int xPos = (int) (x*32 + randomNum);</span>
-<span class="pc bpc" id="L174" title="1 of 2 branches missed.">                    if(xPos &gt;= 896){</span>
-<span class="nc" id="L175">                        xPos = 895;</span>
+<span class="fc bfc" id="L224" title="All 2 branches covered.">            for (int i = 0; i &lt; treesList.size(); i++) {</span>
+<span class="fc" id="L225">                int x = (int) treesList.get(i)[0]; // toa do x</span>
+<span class="fc" id="L226">                float randomNum = treesList.get(i)[2];</span>
+<span class="fc" id="L227">                int imageHeight = assets.get(1).height;</span>
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">                if (treesPosition[x]) { //which denotes there's a tree there</span>
+<span class="fc" id="L229">                    int xPos = (int) (x*32 + randomNum);</span>
+<span class="pc bpc" id="L230" title="1 of 2 branches missed.">                    if(xPos &gt;= 896){</span>
+<span class="nc" id="L231">                        xPos = 895;</span>
                     }
-<span class="fc bfc" id="L177" title="All 2 branches covered.">                    else if(xPos &lt; 0){</span>
-<span class="fc" id="L178">                        xPos = 0;</span>
+<span class="fc bfc" id="L233" title="All 2 branches covered.">                    else if(xPos &lt; 0){</span>
+<span class="fc" id="L234">                        xPos = 0;</span>
                     }
-<span class="fc" id="L180">                    float yPos = (int) Math.min(895, this.averageHeight[Math.min(895, xPos + 16)] - imageHeight);</span>
-<span class="fc" id="L181">                    sketch.image(assets.get(1), xPos, yPos);</span>
+<span class="fc" id="L236">                    float yPos = (int) Math.min(895, this.averageHeight[Math.min(895, xPos + 16)] - imageHeight);</span>
+<span class="fc" id="L237">                    sketch.image(assets.get(1), xPos, yPos);</span>
                 }
             }
-<span class="fc" id="L184">            this.gameState.drawScoreBoard();</span>
-<span class="fc bfc" id="L185" title="All 2 branches covered.">            if(this.currentLevel.isGameOver()){</span>
-<span class="fc" id="L186">                return;</span>
+<span class="fc" id="L240">            this.gameState.drawScoreBoard();</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">            if(this.currentLevel.isGameOver()){</span>
+<span class="fc" id="L242">                return;</span>
             }
 
-<span class="fc bfc" id="L189" title="All 2 branches covered.">            for (int i = 0; i &lt; this.tanksList.size(); i++){</span>
-<span class="fc" id="L190">                Tank tankToDraw = this.tanksList.get(i);</span>
-<span class="fc bfc" id="L191" title="All 2 branches covered.">                if(hasDead.length == this.tanksList.size()) {</span>
-<span class="pc bpc" id="L192" title="1 of 8 branches missed.">                    if (!hasDead[i] &amp;&amp; (tankToDraw.getHealth() &lt;= 0 || tankToDraw.getY() &gt;= 640) &amp;&amp; this.averageHeight[tankToDraw.getX()] &lt;= tankToDraw.getY()) {</span>
-<span class="pc bpc" id="L193" title="1 of 2 branches missed.">                        if(tankToDraw.getHealth() &lt;= 0) {</span>
-<span class="fc" id="L194">                            handleDraw.add(new Explosion(tankToDraw, sketch, tankToDraw.getX(), tankToDraw.getY(), 15, null));</span>
+<span class="fc bfc" id="L245" title="All 2 branches covered.">            for (int i = 0; i &lt; this.tanksList.size(); i++){</span>
+<span class="fc" id="L246">                Tank tankToDraw = this.tanksList.get(i);</span>
+<span class="fc bfc" id="L247" title="All 2 branches covered.">                if(hasDead.length == this.tanksList.size()) {</span>
+<span class="fc bfc" id="L248" title="All 8 branches covered.">                    if (!hasDead[i] &amp;&amp; (tankToDraw.getHealth() &lt;= 0 || tankToDraw.getY() &gt;= 640) &amp;&amp; this.averageHeight[tankToDraw.getX()] &lt;= tankToDraw.getY()) {</span>
+<span class="fc bfc" id="L249" title="All 2 branches covered.">                        if(tankToDraw.getHealth() &lt;= 0) {</span>
+<span class="fc" id="L250">                            handleDraw.add(new Explosion(tankToDraw, sketch, tankToDraw.getX(), tankToDraw.getY(), 15, null));</span>
                         }
-<span class="nc bnc" id="L196" title="All 2 branches missed.">                        else if(tankToDraw.getY() &gt;= 640){</span>
-<span class="nc" id="L197">                            handleDraw.add(new Explosion(tankToDraw, sketch, tankToDraw.getX(), tankToDraw.getY(), 30, null));</span>
+<span class="pc bpc" id="L252" title="1 of 2 branches missed.">                        else if(tankToDraw.getY() &gt;= 640){</span>
+<span class="fc" id="L253">                            handleDraw.add(new Explosion(tankToDraw, sketch, tankToDraw.getX(), tankToDraw.getY(), 30, null));</span>
 
                         }
-<span class="fc" id="L200">                        hasDead[i] = true;</span>
-<span class="fc" id="L201">                        tankToDraw.setHealth(0);</span>
+<span class="fc" id="L256">                        hasDead[i] = true;</span>
+<span class="fc" id="L257">                        tankToDraw.setHealth(0);</span>
                     }
                 }
                 else{
-<span class="fc" id="L205">                    hasDead = new boolean[this.tanksList.size()];</span>
+<span class="fc" id="L261">                    hasDead = new boolean[this.tanksList.size()];</span>
 
                 }
-<span class="fc bfc" id="L208" title="All 2 branches covered.">                if (!tankToDraw.getTankExplosionList().isEmpty()) {</span>
-<span class="fc" id="L209">                    Explosion firstExplosion = tankToDraw.getTankExplosionList().get(0);</span>
-<span class="fc" id="L210">                    this.destruction.addAll(tankToDraw.getTankExplosionList());</span>
-<span class="fc" id="L211">                    handleDraw.addAll(tankToDraw.getTankExplosionList());</span>
-<span class="fc" id="L212">                    tankToDraw.getTankExplosionList().remove(firstExplosion);</span>
+<span class="fc bfc" id="L264" title="All 2 branches covered.">                if (!tankToDraw.getTankExplosionList().isEmpty()) {</span>
+<span class="fc" id="L265">                    Explosion firstExplosion = tankToDraw.getTankExplosionList().get(0);</span>
+<span class="fc" id="L266">                    this.destruction.addAll(tankToDraw.getTankExplosionList());</span>
+<span class="fc" id="L267">                    handleDraw.addAll(tankToDraw.getTankExplosionList());</span>
+<span class="fc" id="L268">                    tankToDraw.getTankExplosionList().remove(firstExplosion);</span>
                 }
-<span class="fc" id="L214">                tankToDraw.drawTank(sketch);</span>
-<span class="fc" id="L215">                tankToDraw.endTurn();</span>
+<span class="fc" id="L270">                tankToDraw.drawTank(sketch);</span>
+<span class="fc" id="L271">                tankToDraw.endTurn();</span>
             }
-<span class="fc" id="L217">    }</span>
+<span class="fc" id="L273">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

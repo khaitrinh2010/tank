@@ -1,24 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="Tanks.TankTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2024-05-12T06:21:32" hostname="LAPTOP-2SI78J1K" time="28.732">
+<testsuite name="Tanks.TankTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2024-05-12T10:01:16" hostname="LAPTOP-2SI78J1K" time="25.429">
   <properties/>
-  <testcase name="testUltimateImage()" classname="Tanks.TankTest" time="3.168"/>
-  <testcase name="testHitOpponentWithParachute()" classname="Tanks.TankTest" time="4.065"/>
-  <testcase name="testMovementToBoundaryLeft()" classname="Tanks.TankTest" time="1.017"/>
+  <testcase name="testUltimateImage()" classname="Tanks.TankTest" time="3.043"/>
+  <testcase name="testHitOpponentWithParachute()" classname="Tanks.TankTest" time="4.04"/>
+  <testcase name="testUpdateTurretToBoundary()" classname="Tanks.TankTest" time="1.02"/>
   <testcase name="testWithIrrelevantKey()" classname="Tanks.TankTest" time="1.018"/>
-  <testcase name="testMovementWithNoFuel()" classname="Tanks.TankTest" time="1.016"/>
-  <testcase name="testRandomColor()" classname="Tanks.TankTest" time="1.017"/>
-  <testcase name="testUpdateTurretToBoundaryLeft()" classname="Tanks.TankTest" time="1.019"/>
-  <testcase name="testUltimate()" classname="Tanks.TankTest" time="3.149"/>
-  <testcase name="testPowerUp()" classname="Tanks.TankTest" time="1.042"/>
-  <testcase name="testRandomColour()" classname="Tanks.TankTest" time="0.0"/>
-  <testcase name="testMovementToBoundaryRight()" classname="Tanks.TankTest" time="1.018"/>
-  <testcase name="testUpdateTurret()" classname="Tanks.TankTest" time="1.073"/>
-  <testcase name="testUpdateMovementRight()" classname="Tanks.TankTest" time="1.02"/>
-  <testcase name="testUpdateTurretToBoundaryRight()" classname="Tanks.TankTest" time="1.024"/>
-  <testcase name="testUpdateMovementLeft()" classname="Tanks.TankTest" time="1.025"/>
+  <testcase name="testMovementWithNoFuel()" classname="Tanks.TankTest" time="1.018"/>
+  <testcase name="testRandomColor()" classname="Tanks.TankTest" time="1.018"/>
+  <testcase name="testMovementToBoundary()" classname="Tanks.TankTest" time="1.026"/>
+  <testcase name="testUltimate()" classname="Tanks.TankTest" time="3.121"/>
+  <testcase name="testPowerUp()" classname="Tanks.TankTest" time="1.018"/>
+  <testcase name="testUpdateTurret()" classname="Tanks.TankTest" time="1.025"/>
+  <testcase name="testUpdateMovementRight()" classname="Tanks.TankTest" time="1.017"/>
+  <testcase name="testUpdateMovementLeft()" classname="Tanks.TankTest" time="1.019"/>
   <testcase name="testHitOpponentWithoutParachute()" classname="Tanks.TankTest" time="5.018"/>
-  <testcase name="testPowerUpsWithInsufficientPoint()" classname="Tanks.TankTest" time="1.018"/>
-  <testcase name="testPowerUpExceedBoundary()" classname="Tanks.TankTest" time="1.017"/>
+  <testcase name="testPowerUpExceedInValid()" classname="Tanks.TankTest" time="1.02"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

@@ -26,190 +26,231 @@ public class GameState {
 <span class="fc" id="L26">    private int idx = 0;</span>
 <span class="fc" id="L27">    private ArrayList&lt;PImage&gt; assets = new ArrayList&lt;&gt;();</span>
 <span class="fc" id="L28">    private int initialWind = random.nextInt(71) - 35;</span>
-<span class="fc" id="L29">    public GameState(Level level, PApplet sketch){</span>
-<span class="fc" id="L30">        this.sketch = sketch;</span>
-<span class="fc" id="L31">        this.level = level;</span>
-<span class="fc" id="L32">        int initialPoint = 215 - 35 * totalPlayers / 4;</span>
-<span class="fc" id="L33">    }</span>
+
+    /**
+     * Represents the current state of the game, keep track of tanks, environmental effects and things that shared between tanks
+     * Each level has its own state
+     */
+<span class="fc" id="L34">    public GameState(Level level, PApplet sketch){</span>
+<span class="fc" id="L35">        this.sketch = sketch;</span>
+<span class="fc" id="L36">        this.level = level;</span>
+<span class="fc" id="L37">    }</span>
+
+    /**
+     * Set the tank list of the game participating in this current level and sort them
+     * @param tankslist an ArrayList of Tank object includes tanks that are managed
+     */
     public void setTankList(ArrayList&lt;Tank&gt; tankslist){
-<span class="fc" id="L35">        this.tankArrayList = tankslist;</span>
-<span class="fc" id="L36">        Collections.sort(this.tankArrayList);</span>
-<span class="fc" id="L37">        totalPlayers = this.tankArrayList.size();</span>
-<span class="fc" id="L38">    }</span>
+<span class="fc" id="L44">        this.tankArrayList = tankslist;</span>
+<span class="fc" id="L45">        Collections.sort(this.tankArrayList);</span>
+<span class="fc" id="L46">        totalPlayers = this.tankArrayList.size();</span>
+<span class="fc" id="L47">    }</span>
+
+    /**
+     * Set the assets used for shared visual elements in the game such as wind image, fuel image, parachute image
+     * @param images the list of images that being shared across all tanks in the level
+     */
     public void setAssets(ArrayList&lt;PImage&gt; images){
-<span class="fc" id="L40">        assets = images;</span>
-<span class="fc" id="L41">    }</span>
+<span class="fc" id="L54">        assets = images;</span>
+<span class="fc" id="L55">    }</span>
+    /**
+     * Draw shared visual elements of the game
+     */
     public void drawSharedThings(){
-<span class="fc" id="L43">        PImage fuel = assets.get(0);</span>
-<span class="fc" id="L44">        PImage parachute = assets.get(1);</span>
-<span class="fc" id="L45">        fuel.resize(32, 32);</span>
-<span class="fc" id="L46">        parachute.resize(42, 42);</span>
-<span class="fc" id="L47">        this.sketch.image(parachute, 175, 55);</span>
-<span class="fc" id="L48">        this.sketch.image(fuel, 180, 10);</span>
-<span class="fc" id="L49">    }</span>
-    public ArrayList&lt;Tank&gt; getTankArrayList(){
-<span class="nc" id="L51">        return this.tankArrayList;</span>
-    }
-
+<span class="fc" id="L60">        PImage fuel = assets.get(0);</span>
+<span class="fc" id="L61">        PImage parachute = assets.get(1);</span>
+<span class="fc" id="L62">        fuel.resize(32, 32);</span>
+<span class="fc" id="L63">        parachute.resize(42, 42);</span>
+<span class="fc" id="L64">        this.sketch.image(parachute, 175, 55);</span>
+<span class="fc" id="L65">        this.sketch.image(fuel, 180, 10);</span>
+<span class="fc" id="L66">    }</span>
+    /**
+     * Draw the scoreboard, both when the game is over orr in the game
+     */
     public void drawScoreBoard() {
-<span class="fc bfc" id="L55" title="All 2 branches covered.">        if(this.level.isGameOver()){</span>
-<span class="fc" id="L56">            float x = 864*0.35f;</span>
-<span class="fc" id="L57">            float y = 640*0.25f;</span>
-<span class="fc" id="L58">            float recHeight = 640*0.35f;</span>
-<span class="fc" id="L59">            float z = y + 60;</span>
-<span class="fc" id="L60">            this.sketch.stroke(0);</span>
-<span class="fc" id="L61">            this.sketch.fill(0);</span>
-<span class="fc" id="L62">            this.sketch.text(&quot;Final Scores&quot;, x, y + 50);</span>
-<span class="fc" id="L63">            this.sketch.line(x, z, x + 300, z);</span>
-<span class="fc" id="L64">            this.sketch.noFill();</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        if(this.level.isGameOver()){</span>
+<span class="fc" id="L72">            float x = 864*0.35f;</span>
+<span class="fc" id="L73">            float y = 640*0.25f;</span>
+<span class="fc" id="L74">            float recHeight = 640*0.35f;</span>
+<span class="fc" id="L75">            float z = y + 60;</span>
+<span class="fc" id="L76">            this.sketch.stroke(0);</span>
+<span class="fc" id="L77">            this.sketch.fill(0);</span>
+<span class="fc" id="L78">            this.sketch.text(&quot;Final Scores&quot;, x, y + 50);</span>
+<span class="fc" id="L79">            this.sketch.line(x, z, x + 300, z);</span>
+<span class="fc" id="L80">            this.sketch.noFill();</span>
             int[] colors;
-<span class="fc" id="L66">            ArrayList&lt;Tank&gt; tankArray = this.tankArrayList;</span>
-<span class="fc" id="L67">            tankArray.sort((tank1, tank2) -&gt; tank2.getPoint() - tank1.getPoint());</span>
-<span class="fc" id="L68">            Tank winner = this.tankArrayList.get(0);</span>
-<span class="fc" id="L69">            colors = winner.getColourList();</span>
-<span class="fc" id="L70">            this.sketch.fill(colors[0], colors[1], colors[2]);</span>
-<span class="fc" id="L71">            this.sketch.text(&quot;Player &quot; + winner.getPlayerNumber() + &quot; wins!&quot;, x, y);</span>
-<span class="fc" id="L72">            this.sketch.noFill();</span>
-<span class="fc" id="L73">            this.sketch.fill(colors[0] ,  colors[1],  colors[2], 50);</span>
-<span class="fc" id="L74">            this.sketch.stroke(0);</span>
-<span class="fc" id="L75">            this.sketch.strokeWeight(4);</span>
+<span class="fc" id="L82">            ArrayList&lt;Tank&gt; tankArray = this.tankArrayList;</span>
+<span class="fc" id="L83">            tankArray.sort((tank1, tank2) -&gt; tank2.getPoint() - tank1.getPoint());</span>
+<span class="fc" id="L84">            Tank winner = this.tankArrayList.get(0);</span>
+<span class="fc" id="L85">            colors = winner.getColourList();</span>
+<span class="fc" id="L86">            this.sketch.fill(colors[0], colors[1], colors[2]);</span>
+<span class="fc" id="L87">            this.sketch.text(&quot;Player &quot; + winner.getPlayerNumber() + &quot; wins!&quot;, x, y);</span>
+<span class="fc" id="L88">            this.sketch.noFill();</span>
+<span class="fc" id="L89">            this.sketch.fill(colors[0] ,  colors[1],  colors[2], 50);</span>
+<span class="fc" id="L90">            this.sketch.stroke(0);</span>
+<span class="fc" id="L91">            this.sketch.strokeWeight(4);</span>
 
-<span class="fc" id="L77">            this.sketch.rect(x, y + 30, 300, recHeight);</span>
-<span class="fc" id="L78">            transitionTime += 700.0f / this.sketch.frameRate;</span>
+<span class="fc" id="L93">            this.sketch.rect(x, y + 30, 300, recHeight);</span>
+<span class="fc" id="L94">            transitionTime += 700.0f / this.sketch.frameRate;</span>
 
-<span class="fc bfc" id="L80" title="All 2 branches covered.">            if (transitionTime &gt;= endTime) {</span>
-<span class="fc" id="L81">                transitionTime = 0;</span>
-<span class="fc" id="L82">                idx++;</span>
-<span class="pc bpc" id="L83" title="1 of 2 branches missed.">                if(idx &gt;= tankArray.size()){</span>
-<span class="nc" id="L84">                    idx = tankArray.size() - 1;</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">            if (transitionTime &gt;= endTime) {</span>
+<span class="fc" id="L97">                transitionTime = 0;</span>
+<span class="fc" id="L98">                idx++;</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">                if(idx &gt;= tankArray.size()){</span>
+<span class="nc" id="L100">                    idx = tankArray.size() - 1;</span>
                 }
             }
-<span class="fc bfc" id="L87" title="All 2 branches covered.">            for (int i = 0; i &lt;= idx; i++) {</span>
-<span class="fc" id="L88">                Tank tank = tankArray.get(i);</span>
-<span class="fc" id="L89">                int[] tanksColour = tank.getColourList();</span>
-<span class="fc" id="L90">                int r = tanksColour[0]; int g = tanksColour[1]; int b = tanksColour[2];</span>
-<span class="fc" id="L91">                this.sketch.fill(r,g,b);</span>
-<span class="fc" id="L92">                String text = &quot;Player&quot; + tank.getPlayerNumber();</span>
-<span class="fc" id="L93">                this.sketch.text(text, x + 25, y + 95 + i*45);</span>
-<span class="fc" id="L94">                this.sketch.text(String.valueOf(tank.getPoint()), x + 240, y + 95 + i*45);</span>
-<span class="fc" id="L95">                this.sketch.noFill();</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">            for (int i = 0; i &lt;= idx; i++) {</span>
+<span class="fc" id="L104">                Tank tank = tankArray.get(i);</span>
+<span class="fc" id="L105">                int[] tanksColour = tank.getColourList();</span>
+<span class="fc" id="L106">                int r = tanksColour[0]; int g = tanksColour[1]; int b = tanksColour[2];</span>
+<span class="fc" id="L107">                this.sketch.fill(r,g,b);</span>
+<span class="fc" id="L108">                String text = &quot;Player&quot; + tank.getPlayerNumber();</span>
+<span class="fc" id="L109">                this.sketch.text(text, x + 25, y + 95 + i*45);</span>
+<span class="fc" id="L110">                this.sketch.text(String.valueOf(tank.getPoint()), x + 240, y + 95 + i*45);</span>
+<span class="fc" id="L111">                this.sketch.noFill();</span>
             }
-<span class="fc" id="L97">            this.sketch.noFill();</span>
-<span class="fc" id="L98">            this.sketch.noStroke();</span>
+<span class="fc" id="L113">            this.sketch.noFill();</span>
+<span class="fc" id="L114">            this.sketch.noStroke();</span>
             //drawSharedThings();
-<span class="fc" id="L100">            return;</span>
+<span class="fc" id="L116">            return;</span>
         }
-<span class="fc" id="L102">        windImage = this.sketch.loadImage(windImagePath);</span>
-<span class="fc" id="L103">        windImage.resize(40,40);</span>
-<span class="fc" id="L104">        windImage2 = this.sketch.loadImage(windImagePath2);</span>
-<span class="fc" id="L105">        windImage2.resize(40,40);</span>
-<span class="fc" id="L106">        this.drawWind(windImage, windImage2);</span>
-<span class="fc" id="L107">        this.sketch.textSize(24);</span>
-<span class="fc" id="L108">        this.sketch.fill(0);</span>
-<span class="fc" id="L109">        this.sketch.text(String.valueOf(abs(initialWind)), 800, 40);</span>
-<span class="fc" id="L110">        this.sketch.noFill();</span>
-<span class="fc" id="L111">        this.sketch.stroke(5);</span>
-<span class="fc" id="L112">        this.sketch.textSize(20);</span>
-<span class="fc" id="L113">        this.sketch.strokeWeight(4);</span>
-<span class="fc" id="L114">        this.sketch.rect(650, 50, 200, 140);</span>
-<span class="fc" id="L115">        this.sketch.text(&quot;Scores&quot;, 670, 75);</span>
-<span class="fc" id="L116">        this.sketch.line(650, 80, 850, 78);</span>
-<span class="fc" id="L117">        drawDetail();</span>
-<span class="fc" id="L118">        drawSharedThings();</span>
-<span class="fc" id="L119">    }</span>
-    public Level getLevel(){
-<span class="nc" id="L121">        return this.level;</span>
-    }
+<span class="fc" id="L118">        windImage = this.sketch.loadImage(windImagePath);</span>
+<span class="fc" id="L119">        windImage.resize(40,40);</span>
+<span class="fc" id="L120">        windImage2 = this.sketch.loadImage(windImagePath2);</span>
+<span class="fc" id="L121">        windImage2.resize(40,40);</span>
+<span class="fc" id="L122">        this.drawWind(windImage, windImage2);</span>
+<span class="fc" id="L123">        this.sketch.textSize(24);</span>
+<span class="fc" id="L124">        this.sketch.fill(0);</span>
+<span class="fc" id="L125">        this.sketch.text(String.valueOf(abs(initialWind)), 800, 40);</span>
+<span class="fc" id="L126">        this.sketch.noFill();</span>
+<span class="fc" id="L127">        this.sketch.stroke(5);</span>
+<span class="fc" id="L128">        this.sketch.textSize(20);</span>
+<span class="fc" id="L129">        this.sketch.strokeWeight(4);</span>
+<span class="fc" id="L130">        this.sketch.rect(650, 50, 200, 140);</span>
+<span class="fc" id="L131">        this.sketch.text(&quot;Scores&quot;, 670, 75);</span>
+<span class="fc" id="L132">        this.sketch.line(650, 80, 850, 78);</span>
+<span class="fc" id="L133">        drawDetail();</span>
+<span class="fc" id="L134">        drawSharedThings();</span>
+<span class="fc" id="L135">    }</span>
+    /**
+     * draws the normal scoreboard when the game is not over, gets called by the previous function
+     */
     public void drawDetail(){
-<span class="fc" id="L124">        float y = 100;</span>
-<span class="fc bfc" id="L125" title="All 2 branches covered.">        for(int i = 0; i &lt; this.tankArrayList.size(); i ++){</span>
+<span class="fc" id="L140">        float y = 100;</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        for(int i = 0; i &lt; this.tankArrayList.size(); i ++){</span>
             //if(this.tankArrayList.get(i).getHealth() &gt; 0) {
-<span class="fc" id="L127">            colors = this.tankArrayList.get(i).getColourList();</span>
-<span class="fc" id="L128">            String text = &quot;Player &quot; + this.tankArrayList.get(i).getCurrentPlayer();</span>
-<span class="fc" id="L129">            this.sketch.fill(colors[0], colors[1], colors[2]);</span>
-<span class="fc" id="L130">            this.sketch.text(text, 670, y);</span>
-<span class="fc" id="L131">            this.sketch.text(String.valueOf(this.tankArrayList.get(i).getPoint()), 800, y);</span>
-<span class="fc" id="L132">            this.sketch.noFill();</span>
-<span class="fc" id="L133">            y += 25;</span>
-<span class="pc bpc" id="L134" title="1 of 2 branches missed.">            if (y == totalPlayers - 1) {</span>
-<span class="nc" id="L135">                y = 40;</span>
+<span class="fc" id="L143">            colors = this.tankArrayList.get(i).getColourList();</span>
+<span class="fc" id="L144">            String text = &quot;Player &quot; + this.tankArrayList.get(i).getPlayerNumber();</span>
+<span class="fc" id="L145">            this.sketch.fill(colors[0], colors[1], colors[2]);</span>
+<span class="fc" id="L146">            this.sketch.text(text, 670, y);</span>
+<span class="fc" id="L147">            this.sketch.text(String.valueOf(this.tankArrayList.get(i).getPoint()), 800, y);</span>
+<span class="fc" id="L148">            this.sketch.noFill();</span>
+<span class="fc" id="L149">            y += 25;</span>
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">            if (y == totalPlayers - 1) {</span>
+<span class="nc" id="L151">                y = 40;</span>
             }
             //}
         }
-<span class="fc" id="L139">        this.sketch.noStroke();</span>
-<span class="fc" id="L140">    }</span>
+<span class="fc" id="L155">        this.sketch.noStroke();</span>
+<span class="fc" id="L156">    }</span>
+    /**
+     * Retrieves which turn it is
+     * @return a String that displayed on the top left of the screen
+     */
     public String generateReport(){
-<span class="fc" id="L142">        String text = &quot;Player &quot; + this.getCurrentPlayer() + &quot;'s &quot; + &quot;turn&quot;;</span>
-<span class="fc" id="L143">        return text;</span>
+<span class="fc" id="L162">        return &quot;Player &quot; + this.getCurrentPlayer() + &quot;'s &quot; + &quot;turn&quot;;</span>
     }
+    /**
+     * return the current player in turn, compare with the isThisPlayerTurn() in the tank class to decide actions of the tank
+     * @return a String that represents the current player number
+     */
     public String getCurrentPlayer(){
-<span class="fc" id="L146">        Collections.sort(this.tankArrayList);</span>
-<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        if(this.tankArrayList.isEmpty()){</span>
-<span class="nc" id="L148">            return &quot;No Player Found&quot;;</span>
+<span class="fc" id="L169">        Collections.sort(this.tankArrayList);</span>
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        if(this.tankArrayList.isEmpty()){</span>
+<span class="nc" id="L171">            return &quot;No Player Found&quot;;</span>
         }
-<span class="fc" id="L150">        return this.tankArrayList.get(index).getCurrentPlayer();</span>
+<span class="fc" id="L173">        return this.tankArrayList.get(index).getPlayerNumber();</span>
     }
+    /**
+     * Check if the game is over based on the health and user's input
+     * @return true if the current level is over, false otherwise
+     */
     public boolean isGameOver(){
-<span class="fc" id="L153">        int count = 0;</span>
-<span class="pc bpc" id="L154" title="1 of 2 branches missed.">        if(this.tankArrayList != null) {</span>
-<span class="fc bfc" id="L155" title="All 2 branches covered.">            for (Tank tank : this.tankArrayList) {</span>
-<span class="fc bfc" id="L156" title="All 2 branches covered.">                if (tank.getHealth() &gt; 0) {</span>
-<span class="fc" id="L157">                    count++;</span>
+<span class="fc" id="L180">        int count = 0;</span>
+<span class="pc bpc" id="L181" title="1 of 2 branches missed.">        if(this.tankArrayList != null) {</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">            for (Tank tank : this.tankArrayList) {</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">                if (tank.getHealth() &gt; 0) {</span>
+<span class="fc" id="L184">                    count++;</span>
                 }
-<span class="fc" id="L159">            }</span>
-<span class="fc bfc" id="L160" title="All 4 branches covered.">            if (count == 1 || count == 0) {</span>
-<span class="pc bpc" id="L161" title="3 of 4 branches missed.">                if(this.sketch.keyPressed &amp;&amp; this.sketch.key == ' '){</span>
-<span class="nc" id="L162">                    return true;</span>
+<span class="fc" id="L186">            }</span>
+<span class="fc bfc" id="L187" title="All 4 branches covered.">            if (count == 1 || count == 0) {</span>
+<span class="pc bpc" id="L188" title="3 of 4 branches missed.">                if(this.sketch.keyPressed &amp;&amp; this.sketch.key == ' '){</span>
+<span class="nc" id="L189">                    return true;</span>
                 }
-<span class="fc bfc" id="L164" title="All 2 branches covered.">                if(start &gt; transistion) {</span>
-<span class="fc" id="L165">                    index = 0;</span>
-<span class="fc" id="L166">                    return true;</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">                if(start &gt; transistion) {</span>
+<span class="fc" id="L192">                    index = 0;</span>
+<span class="fc" id="L193">                    return true;</span>
                 }
                 else{
-<span class="fc" id="L169">                    start += (int) (1000.0f/this.sketch.frameRate);</span>
+<span class="fc" id="L196">                    start += (int) (1000.0f/this.sketch.frameRate);</span>
                 }
             }
         }
 
-<span class="fc" id="L174">        return false; //not yet end the game</span>
+<span class="fc" id="L201">        return false; //not yet end the game</span>
     }
+    /**
+     * Decide which player's turn is next, update the active player
+     */
     public void nextTurn(){
-<span class="fc" id="L177">        Collections.sort(this.tankArrayList);</span>
-<span class="fc" id="L178">        int count = 0;</span>
-<span class="fc" id="L179">        index = (index+1)  % (this.tankArrayList.size());</span>
+<span class="fc" id="L207">        Collections.sort(this.tankArrayList);</span>
+<span class="fc" id="L208">        int count = 0;</span>
+<span class="fc" id="L209">        index = (index+1)  % (this.tankArrayList.size());</span>
         //find the next player that is alive
-<span class="fc bfc" id="L181" title="All 2 branches covered.">        for (Tank tank : this.tankArrayList) {</span>
-<span class="fc bfc" id="L182" title="All 2 branches covered.">            if (tank.getHealth() &gt; 0) {</span>
-<span class="fc" id="L183">                count++;</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">        for (Tank tank : this.tankArrayList) {</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">            if (tank.getHealth() &gt; 0) {</span>
+<span class="fc" id="L213">                count++;</span>
             }
-<span class="fc" id="L185">        }</span>
-<span class="fc bfc" id="L186" title="All 2 branches covered.">        if(count &gt;= 1){</span>
+<span class="fc" id="L215">        }</span>
+<span class="fc bfc" id="L216" title="All 2 branches covered.">        if(count &gt;= 1){</span>
         while(true) {
-<span class="fc bfc" id="L188" title="All 2 branches covered.">            if (this.tankArrayList.get(index).getHealth() &gt; 0) {</span>
-<span class="fc" id="L189">                break;</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">            if (this.tankArrayList.get(index).getHealth() &gt; 0) {</span>
+<span class="fc" id="L219">                break;</span>
             }
-<span class="fc" id="L191">            index = (index + 1) % (this.tankArrayList.size());</span>
+<span class="fc" id="L221">            index = (index + 1) % (this.tankArrayList.size());</span>
         }
         }
-<span class="fc" id="L194">        initialWind += random.nextInt(11) - 5;</span>
-<span class="fc" id="L195">    }</span>
+<span class="fc" id="L224">        initialWind += random.nextInt(11) - 5;</span>
+<span class="fc" id="L225">    }</span>
+    /**
+     * Draw the wind image
+     * @param windImage an image used the wind is blowing right
+     * @param windImage2 an image used the wind is blowing left
+     */
     public void drawWind(PImage windImage, PImage windImage2){
-<span class="fc bfc" id="L197" title="All 2 branches covered.">        if(this.getWind() &gt;= 0){</span>
-<span class="fc" id="L198">            this.sketch.image(windImage, 750, 10);</span>
+<span class="fc bfc" id="L232" title="All 2 branches covered.">        if(this.getWind() &gt;= 0){</span>
+<span class="fc" id="L233">            this.sketch.image(windImage, 750, 10);</span>
         }
-<span class="fc bfc" id="L200" title="All 2 branches covered.">        if(this.getWind() &lt; 0){</span>
-<span class="fc" id="L201">            this.sketch.image(windImage2, 750, 10);</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">        if(this.getWind() &lt; 0){</span>
+<span class="fc" id="L236">            this.sketch.image(windImage2, 750, 10);</span>
         }
-<span class="fc" id="L203">    }</span>
+<span class="fc" id="L238">    }</span>
+
+    /**
+     * return the current wind of this turn
+     * @return an integer represents the power of the wind in this turn
+     */
     public int getWind() {
-<span class="fc" id="L205">        return initialWind; //no fluctuation in wind power</span>
+<span class="fc" id="L245">        return initialWind; //no fluctuation in wind power</span>
     }
-    public void increaseTime(int amount){
-<span class="nc" id="L208">        this.start += amount;</span>
-<span class="nc" id="L209">    }</span>
+    /**
+     * set the wind of this turn to a new number
+     * @param newWind aan integer represents the new wind power
+     */
     public void setWind(int newWind){
-<span class="fc" id="L211">        initialWind = newWind;</span>
-<span class="fc" id="L212">    }</span>
+<span class="fc" id="L252">        initialWind = newWind;</span>
+<span class="fc" id="L253">    }</span>
 
 
 }

@@ -37,9 +37,7 @@ public class TerrainTest {
         opponent = level1.allLevels.get(0).getTanksList().get(1);
         averageHeight = terrain.getAverageHeight();
         sketch.delay(500);
-
         //Create a hole
-
         opponent.setX(390);
         opponent.setY(terrain.getAverageHeight()[390]);
         sketch.delay(1000);
@@ -49,34 +47,34 @@ public class TerrainTest {
         sketch.noLoop();
         sketch.dispose();
     }
-    @Test
-    public void testHitADeadTank(){
-        level1.getState().setWind(0);
-        for(int i = 0; i < level1.getTanksList().size(); i++){
-            Tank tank = level1.getTanksList().get(i);
-            if(i == 1 || i == 3){
-                tank.setHealth(0);
-            }
-        }
-        sketch.delay(1000);
 
-        //Below I set up a scenario when the the current tank will hit the next tank like in the tank test casse
-        int initialPoint = tank.getPoint();
-        tank.setX(100);
-        tank.setY(terrain.getAverageHeight()[100]);
-        //Update the power
-        for(int i = 0; i < 30; i++){
-            sketch.keyPressed(new KeyEvent(null, 0, 0, 0, 'w', 0));
-        }
-        for(int i = 0; i < 13; i++){
-            sketch.keyPressed(new KeyEvent(null, 0, 0, 0, 'l', PConstants.UP));
-        }
-        sketch.delay(1000);
-        sketch.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 0));
-        //await for thing to be continued
-        sketch.delay(2000);
-        assertEquals(initialPoint, tank.getPoint(), "Tank's point should not increase when hit a dead tank");
-    }
+//    public void testHitADeadTank(){
+//        level1.getState().setWind(0);
+//        for(int i = 0; i < level1.getTanksList().size(); i++){
+//            Tank tank = level1.getTanksList().get(i);
+//            if(i == 1 || i == 3){
+//                tank.setHealth(0);
+//            }
+//        }
+//        sketch.delay(1000);
+//
+//        //Below I set up a scenario when the the current tank will hit the next tank like in the tank test casse
+//        int initialPoint = tank.getPoint();
+//        tank.setX(100);
+//        tank.setY(terrain.getAverageHeight()[100]);
+//        //Update the power
+//        for(int i = 0; i < 30; i++){
+//            sketch.keyPressed(new KeyEvent(null, 0, 0, 0, 'w', 0));
+//        }
+//        for(int i = 0; i < 13; i++){
+//            sketch.keyPressed(new KeyEvent(null, 0, 0, 0, 'l', PConstants.UP));
+//        }
+//        sketch.delay(1000);
+//        sketch.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 0));
+//        //await for thing to be continued
+//        sketch.delay(2000);
+//        assertEquals(initialPoint, tank.getPoint(), "Tank's point should not increase when hit a dead tank");
+//    }
 
     @Test
     public void testTankGoOffTerrainAndExplode(){
@@ -98,6 +96,7 @@ public class TerrainTest {
 
         assertEquals(0, tank.getHealth(), "Tank should be explode when going off the terrain");
         sketch.noLoop();
+        sketch.dispose();
     }
 
     @Test

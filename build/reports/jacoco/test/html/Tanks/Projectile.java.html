@@ -14,71 +14,87 @@ public class Projectile extends Thing{
     private float veloHori;
     private float veloVerti;
 <span class="fc" id="L16">    private boolean hasFired = false;</span>
-    private boolean hasDone;
-
     float[] terrainY;
     private Tank tank;
     private boolean ulti;
-    //rsin how quick it moves related to the y axis, rcos how quick it moves related to the x axis
+    /**
+     * Constructs a Projectile object with specific parameters.
+     *
+     * @param tank The tank that fired the projectile.
+     * @param x The initial x-coordinate of the projectile.
+     * @param y The initial y-coordinate of the projectile.
+     * @param power The power of the projectile which affects its velocity.
+     * @param angle The firing angle of the projectile.
+     * @param terrainHeight The height data of the terrain for collision detection.
+     * @param fromUlti Indicates whether the projectile is fired as part of an ultimate ability.
+     */
     public Projectile (Tank tank, float x, float y, float power, float angle, float[] terrainHeight, boolean fromUlti){
-<span class="fc" id="L24">        super((int) x, y);</span>
-<span class="fc" id="L25">        this.tank = tank;</span>
-<span class="fc" id="L26">        this.power = power;</span>
-<span class="fc" id="L27">        angle -= PConstants.HALF_PI;</span>
-<span class="fc" id="L28">        this.veloHori =  this.power * (float) Math.cos(angle);</span>
-<span class="fc" id="L29">        this.veloVerti = this.power * (float) Math.sin(angle);</span>
-<span class="fc" id="L30">        terrainY = terrainHeight;</span>
-<span class="fc" id="L31">        ulti = fromUlti;</span>
-<span class="fc" id="L32">    }</span>
-    public Tank getTank(){
-<span class="nc" id="L34">        return this.tank;</span>
-    }
-    public void fire(float deltaTime, int windPower){
-<span class="fc" id="L37">        this.x += (float) (this.veloHori + windPower*0.03f);</span>
-<span class="fc" id="L38">        this.veloVerti += gravity*deltaTime;</span>
-<span class="fc" id="L39">        this.y += this.veloVerti;</span>
-        //handleError();
-<span class="fc" id="L41">    }</span>
+<span class="fc" id="L32">        super((int) x, y);</span>
+<span class="fc" id="L33">        this.tank = tank;</span>
+<span class="fc" id="L34">        this.power = power;</span>
+<span class="fc" id="L35">        angle -= PConstants.HALF_PI;</span>
+<span class="fc" id="L36">        this.veloHori =  this.power * (float) Math.cos(angle);</span>
+<span class="fc" id="L37">        this.veloVerti = this.power * (float) Math.sin(angle);</span>
+<span class="fc" id="L38">        terrainY = terrainHeight;</span>
+<span class="fc" id="L39">        ulti = fromUlti;</span>
+<span class="fc" id="L40">    }</span>
+
+    /**
+     * Update the position of this projectile based on the power, velocity and wind power
+     * @param windPower, an integer indicates the power of the wind affect the bullet
+     */
+    public void fire(int windPower){
+<span class="fc" id="L47">        this.x += (int) (this.veloHori + windPower*0.03f);</span>
+<span class="fc" id="L48">        this.veloVerti += gravity /30;</span>
+<span class="fc" id="L49">        this.y += this.veloVerti;</span>
+<span class="fc" id="L50">    }</span>
+
+    /**
+     * Draw the projectile
+     * @param sketch, PApplet instance for drawing
+     * @param projColour, an array with RGB values determine the colour of the projectile
+     */
     public void renderProjectile(PApplet sketch, int[] projColour){
-        //handleError();
-<span class="fc bfc" id="L44" title="All 2 branches covered.">        if(!ulti) {</span>
-<span class="fc" id="L45">            sketch.fill(projColour[0], projColour[1], projColour[2]);</span>
-<span class="fc" id="L46">            sketch.ellipse(this.x, this.y, 12, 12); //draw a bullet of 12,12</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if(!ulti) {</span>
+<span class="fc" id="L59">            sketch.fill(projColour[0], projColour[1], projColour[2]);</span>
+<span class="fc" id="L60">            sketch.ellipse(this.x, this.y, 12, 12);</span>
         }
         else{
-<span class="fc" id="L49">            sketch.fill(projColour[0], projColour[1], projColour[2]);</span>
-<span class="fc" id="L50">            sketch.ellipse(this.x, this.y, 18, 18); //draw a bullet of 12,12</span>
+<span class="fc" id="L63">            sketch.fill(projColour[0], projColour[1], projColour[2]);</span>
+<span class="fc" id="L64">            sketch.ellipse(this.x, this.y, 18, 18);</span>
         }
-<span class="fc" id="L52">        sketch.fill(0);</span>
-<span class="fc" id="L53">        sketch.ellipse(this.x, this.y, 4, 4); //draw a bullet of 12,12</span>
-<span class="fc" id="L54">    }</span>
+<span class="fc" id="L66">        sketch.fill(0);</span>
+<span class="fc" id="L67">        sketch.ellipse(this.x, this.y, 4, 4);</span>
+<span class="fc" id="L68">    }</span>
 
+    /**
+     * Determines whether the projectile has hit a target, if yes, it will create an Explosion object
+     * @param sketch, PApplet instance for drawing explosions.
+     * @param terrainY, the heights array to check whether the bullet has hit the terrain
+     * @return true if the projectile has hit the terrain, false otherwise.
+     */
     public boolean hasDoneFired(PApplet sketch, float[] terrainY){
-<span class="pc bpc" id="L57" title="3 of 8 branches missed.">        if(this.y &gt;= 640 || this.y &lt;= 0 || this.x &gt;= 864 || this.x &lt;= 0){</span>
-<span class="fc" id="L58">            Explosion newExplosion = new Explosion(this.tank, sketch, this.x, this.y, 30, this);</span>
-<span class="fc" id="L59">            this.explosionList.add(newExplosion);</span>
-<span class="fc" id="L60">            return true;</span>
+<span class="pc bpc" id="L77" title="4 of 8 branches missed.">        if(this.y &gt;= 640 || this.y &lt;= 0 || this.x &gt;= 864 || this.x &lt;= 0){</span>
+<span class="nc" id="L78">            Explosion newExplosion = new Explosion(this.tank, sketch, this.x, this.y, 30, this);</span>
+<span class="nc" id="L79">            this.explosionList.add(newExplosion);</span>
+<span class="nc" id="L80">            return true;</span>
         }
-<span class="fc bfc" id="L62" title="All 2 branches covered.">        for(int i = 0; i &lt; terrainY.length; i++){</span>
-<span class="fc" id="L63">            int currentX = (int) Math.floor(this.x);</span>
-<span class="pc bpc" id="L64" title="1 of 4 branches missed.">            if(terrainY[currentX] &lt;= this.y &amp;&amp; !hasFired){</span>
-<span class="fc" id="L65">                Explosion newExplosion = null;</span>
-<span class="pc bpc" id="L66" title="1 of 2 branches missed.">                if(!ulti) {</span>
-<span class="fc" id="L67">                    newExplosion = new Explosion(this.tank, sketch, this.x, this.y, 30, this);</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        for(int i = 0; i &lt; terrainY.length; i++){</span>
+<span class="fc" id="L83">            int currentX = (int) (double) this.x;</span>
+<span class="pc bpc" id="L84" title="1 of 4 branches missed.">            if(terrainY[currentX] &lt;= this.y &amp;&amp; !hasFired){</span>
+<span class="fc" id="L85">                Explosion newExplosion = null;</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">                if(!ulti) {</span>
+<span class="fc" id="L87">                    newExplosion = new Explosion(this.tank, sketch, this.x, this.y, 30, this);</span>
                 }
                 else{
-<span class="nc" id="L70">                    newExplosion = new Explosion(this.tank, sketch, this.x, this.y, 45, this);</span>
+<span class="fc" id="L90">                    newExplosion = new Explosion(this.tank, sketch, this.x, this.y, 45, this);</span>
                 }
-<span class="fc" id="L72">                this.tank.getTankExplosionList().add(newExplosion);</span>
-<span class="fc" id="L73">                return true;</span>
+<span class="fc" id="L92">                this.tank.getTankExplosionList().add(newExplosion);</span>
+<span class="fc" id="L93">                return true;</span>
             }
         }
-<span class="fc" id="L76">        return false;</span>
+<span class="fc" id="L96">        return false;</span>
 
     }
-    public void setUlti(boolean value){
-<span class="nc" id="L80">        ulti = value;</span>
-<span class="nc" id="L81">    }</span>
-
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

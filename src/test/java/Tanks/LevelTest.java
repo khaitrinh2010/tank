@@ -86,6 +86,7 @@ public class LevelTest {
     @Test
     public void testTransitionLevel(){
         level1.getState().setWind(0);
+        sketch.delay(100);
         int oldLLevelNumber = sketch.getCurrentLevel().getLevelNumber();
         for(int i = 0; i < level1.getTanksList().size(); i++){
             Tank tank = level1.getTanksList().get(i);
@@ -94,7 +95,7 @@ public class LevelTest {
                 tank.setY(terrain.getAverageHeight()[100]);
             }
             else if(i == 1){
-                tank.setHealth(10);
+                tank.setHealth(5);
                 tank.setX(390);
                 tank.setY(terrain.getAverageHeight()[390]);
             }
@@ -138,15 +139,12 @@ public class LevelTest {
             sketch.keyPressed(new KeyEvent(null, 0,0,0,'s',0));
         }
         sketch.delay(2000);
-
         //Kill the tank itself
-
         sketch.keyPressed(new KeyEvent(null, 0,0,0,' ',0));
         sketch.delay(2000);
         assertTrue(level3.isGameOver(), "The game should be over after the last level ends");
 
         sketch.delay(2000);
-
     }
 
     @Test

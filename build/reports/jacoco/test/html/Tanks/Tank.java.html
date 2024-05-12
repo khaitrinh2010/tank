@@ -19,18 +19,18 @@ public class Tank extends Thing implements Movement, Comparable&lt;Tank&gt;{
 <span class="fc" id="L19">    private boolean decreaseParachute = false;</span>
 <span class="fc" id="L20">    private int arrowTime = 2000;</span>
 <span class="fc" id="L21">    private int startTurnTime = 0;</span>
-
-<span class="fc" id="L23">    public float[] averageHeight = new float[896];</span>
+<span class="fc" id="L22">    public float[] averageHeight = new float[896];</span>
     public GameState currentState;
     private boolean isDead;
     private int fuel;
     private int health;
     private float power;
-<span class="fc" id="L29">    private String currentWorkingDirec = System.getProperty(&quot;user.dir&quot;);</span>
+<span class="fc" id="L28">    private String currentWorkingDirec = System.getProperty(&quot;user.dir&quot;);</span>
     private ArrayList&lt;Projectile&gt; projectile;
-<span class="fc" id="L31">    private boolean hasFired = false;</span>
+<span class="fc" id="L30">    private boolean hasFired = false;</span>
     private float turretX;
     private float turretY;
+<span class="fc" id="L33">    int j = 1;</span>
     private ArrayList&lt;Explosion&gt; tankExplosion;
     private int point;
     private PImage parachute;
@@ -53,379 +53,514 @@ public class Tank extends Thing implements Movement, Comparable&lt;Tank&gt;{
 <span class="fc" id="L53">        this.parachuteCount = 3;</span>
 <span class="fc" id="L54">        loadOtherThings(currentGameState, setting);</span>
 <span class="fc" id="L55">    }</span>
-
+    /**
+     * load various settings for the tank
+     * @param currentGameState the current state of the game
+     * @param setting JSONObject contains additional feature of the tank
+    */
     public void loadOtherThings(GameState currentGameState, JSONObject setting){
-<span class="fc" id="L58">        fireImage = this.sketch.loadImage(fireImagePath);</span>
-<span class="fc" id="L59">        fireImage.resize(70,70);</span>
-<span class="fc" id="L60">        String parachutePath = currentWorkingDirec + &quot;/src/main/resources/Tanks/parachute.png&quot;;</span>
-<span class="fc" id="L61">        parachute = this.sketch.loadImage(parachutePath);</span>
-<span class="fc" id="L62">        parachute.resize(42, 42);</span>
-<span class="fc" id="L63">        averageHeight = averageHeight;</span>
-<span class="fc" id="L64">        currentState = currentGameState;</span>
-<span class="fc" id="L65">        String statement = setting.getJSONObject(&quot;player_colours&quot;).getString(playerNumber);</span>
-<span class="fc bfc" id="L66" title="All 2 branches covered.">        if(!statement.equals(&quot;random&quot;)){</span>
-<span class="fc" id="L67">            listOfColor[0] = Integer.parseInt(statement.split(&quot;,&quot;)[0]);</span>
-<span class="fc" id="L68">            listOfColor[1] = Integer.parseInt(statement.split(&quot;,&quot;)[1]);</span>
-<span class="fc" id="L69">            listOfColor[2] = Integer.parseInt(statement.split(&quot;,&quot;)[2]);</span>
+<span class="fc" id="L62">        fireImage = this.sketch.loadImage(fireImagePath);</span>
+<span class="fc" id="L63">        fireImage.resize(70,70);</span>
+<span class="fc" id="L64">        String parachutePath = currentWorkingDirec + &quot;/src/main/resources/Tanks/parachute.png&quot;;</span>
+<span class="fc" id="L65">        parachute = this.sketch.loadImage(parachutePath);</span>
+<span class="fc" id="L66">        parachute.resize(42, 42);</span>
+<span class="fc" id="L67">        averageHeight = averageHeight;</span>
+<span class="fc" id="L68">        currentState = currentGameState;</span>
+<span class="fc" id="L69">        String statement = setting.getJSONObject(&quot;player_colours&quot;).getString(playerNumber);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if(!statement.equals(&quot;random&quot;)){</span>
+<span class="fc" id="L71">            listOfColor[0] = Integer.parseInt(statement.split(&quot;,&quot;)[0]);</span>
+<span class="fc" id="L72">            listOfColor[1] = Integer.parseInt(statement.split(&quot;,&quot;)[1]);</span>
+<span class="fc" id="L73">            listOfColor[2] = Integer.parseInt(statement.split(&quot;,&quot;)[2]);</span>
         }
 
         else{
-<span class="fc" id="L73">            Random random = new Random();</span>
-<span class="fc" id="L74">            listOfColor[0] = random.nextInt(256);</span>
-<span class="fc" id="L75">            listOfColor[1] = random.nextInt(256);</span>
-<span class="fc" id="L76">            listOfColor[2] = random.nextInt(256);</span>
+<span class="fc" id="L77">            Random random = new Random();</span>
+<span class="fc" id="L78">            listOfColor[0] = random.nextInt(256);</span>
+<span class="fc" id="L79">            listOfColor[1] = random.nextInt(256);</span>
+<span class="fc" id="L80">            listOfColor[2] = random.nextInt(256);</span>
         }
-<span class="fc" id="L78">        angle = 0;</span>
-<span class="fc" id="L79">    }</span>
+<span class="fc" id="L82">        angle = 0;</span>
+<span class="fc" id="L83">    }</span>
+    /**
+     * Return a list of explosion caused by the tank
+     * @return ArrayList of Explosion Object
+     */
     public ArrayList&lt;Explosion&gt; getTankExplosionList(){
-<span class="fc bfc" id="L81" title="All 2 branches covered.">        if(this.health &lt;= 0){</span>
-<span class="fc" id="L82">            this.tankExplosion.clear();</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if(this.health &lt;= 0){</span>
+<span class="fc" id="L90">            this.tankExplosion.clear();</span>
         }
-<span class="fc" id="L84">        return this.tankExplosion;</span>
+<span class="fc" id="L92">        return this.tankExplosion;</span>
     }
+    /**
+     * Compares this tank to another tank by the letter represent the current player
+     * @return negative integer or positive integer
+     */
     public int compareTo(Tank otherTank){
-<span class="fc" id="L87">        return this.playerNumber.compareTo(otherTank.getPlayerNumber());</span>
+<span class="fc" id="L99">        return this.playerNumber.compareTo(otherTank.getPlayerNumber());</span>
     }
+    /**
+     * Returns the letter represent the player number
+     * @return String represent the player number
+     */
     public String getPlayerNumber(){
-<span class="fc" id="L90">        return this.playerNumber;</span>
+<span class="fc" id="L106">        return this.playerNumber;</span>
     }
+
+    /**
+     * Deploys a parachute to the tank if the tank is falling
+     * @param sketch the PApplet instance for drawing
+     */
     public void renderParachute(PApplet sketch){
-<span class="fc" id="L93">        sketch.image(parachute, this.x - 20, this.y-35);</span>
-<span class="fc" id="L94">    }</span>
+<span class="fc" id="L114">        sketch.image(parachute, this.x - 20, this.y-35);</span>
+<span class="fc" id="L115">    }</span>
+    /**
+     * Draws the tank and its component elements
+     * @param sketch the PApplet instance for drawing
+     */
     public void drawTank(PApplet sketch){
-<span class="fc bfc" id="L96" title="All 2 branches covered.">        if(!hasTurnedOff){</span>
-<span class="fc bfc" id="L97" title="All 6 branches covered.">            if(this.health &lt;= 0 &amp;&amp; this.isThisPlayerTurn() &amp;&amp; this.y &gt;= averageHeight[(int) this.x]){</span>
-<span class="fc" id="L98">                this.currentState.nextTurn();</span>
-<span class="fc" id="L99">                hasTurnedOff = true;</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">        if(!hasTurnedOff){</span>
+<span class="fc bfc" id="L122" title="All 6 branches covered.">            if(this.health &lt;= 0 &amp;&amp; this.isThisPlayerTurn() &amp;&amp; this.y &gt;= averageHeight[(int) this.x]){</span>
+<span class="fc" id="L123">                this.currentState.nextTurn();</span>
+<span class="fc" id="L124">                hasTurnedOff = true;</span>
             }
         }
 
-<span class="fc bfc" id="L103" title="All 4 branches covered.">        if(this.health &gt; 0 || !isDead){</span>
-<span class="fc bfc" id="L104" title="All 4 branches covered.">            if(this.health &lt;= 0 &amp;&amp; this.averageHeight[this.x] &lt;= this.y){</span>
-<span class="fc" id="L105">                isDead = true;</span>
+<span class="fc bfc" id="L128" title="All 4 branches covered.">        if(this.health &gt; 0 || !isDead){</span>
+<span class="fc bfc" id="L129" title="All 4 branches covered.">            if(this.health &lt;= 0 &amp;&amp; this.averageHeight[this.x] &lt;= this.y){</span>
+<span class="fc" id="L130">                isDead = true;</span>
             }
-<span class="fc" id="L107">            int lowerWidth = 24;</span>
-<span class="fc" id="L108">            float upperWidth = lowerWidth * 0.6f;</span>
-<span class="fc" id="L109">            int lowerHeight = 12;</span>
-<span class="fc" id="L110">            float upperHeight = lowerHeight / 2;</span>
-<span class="fc bfc" id="L111" title="All 2 branches covered.">            if(this.ultiLevel == 3){</span>
-<span class="fc" id="L112">                sketch.image(fireImage, this.x - 35, this.y - 60);</span>
+<span class="fc" id="L132">            int lowerWidth = 24;</span>
+<span class="fc" id="L133">            float upperWidth = lowerWidth * 0.6f;</span>
+<span class="fc" id="L134">            int lowerHeight = 12;</span>
+<span class="fc" id="L135">            float upperHeight = lowerHeight / 2;</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">            if(this.ultiLevel == 3){</span>
+<span class="fc" id="L137">                sketch.image(fireImage, this.x - 35, this.y - 60);</span>
             }
-<span class="fc" id="L114">            sketch.fill(listOfColor[0], listOfColor[1], listOfColor[2]);</span>
-<span class="fc" id="L115">            sketch.rect(this.x - lowerWidth / 2, this.y - lowerHeight / 2, lowerWidth, lowerHeight, 40); //corner radius = 5</span>
-<span class="fc" id="L116">            sketch.rect(this.x - lowerWidth / 2 + (lowerWidth - upperWidth) / 2, this.y - lowerHeight / 2 - upperHeight, upperWidth, upperHeight, 40);</span>
+<span class="fc" id="L139">            sketch.fill(listOfColor[0], listOfColor[1], listOfColor[2]);</span>
+<span class="fc" id="L140">            sketch.rect(this.x - lowerWidth / 2, this.y - lowerHeight / 2, lowerWidth, lowerHeight, 40); //corner radius = 5</span>
+<span class="fc" id="L141">            sketch.rect(this.x - lowerWidth / 2 + (lowerWidth - upperWidth) / 2, this.y - lowerHeight / 2 - upperHeight, upperWidth, upperHeight, 40);</span>
             //isolate the turret to only draw it
-<span class="fc" id="L118">            sketch.pushMatrix();</span>
-<span class="fc" id="L119">            sketch.translate(this.x, this.y - lowerHeight - upperHeight / 6);</span>
-<span class="fc" id="L120">            turretX = this.x;</span>
-<span class="fc" id="L121">            turretY = this.y - lowerHeight - upperHeight / 6;</span>
+<span class="fc" id="L143">            sketch.pushMatrix();</span>
+<span class="fc" id="L144">            sketch.translate(this.x, this.y - lowerHeight - upperHeight / 6);</span>
+<span class="fc" id="L145">            turretX = this.x;</span>
+<span class="fc" id="L146">            turretY = this.y - lowerHeight - upperHeight / 6;</span>
             //draw the turret
-<span class="fc" id="L123">            sketch.rotate(angle);</span>
-<span class="fc" id="L124">            sketch.stroke(100, 100, 100);</span>
-<span class="fc" id="L125">            sketch.strokeWeight(3);</span>
-<span class="fc" id="L126">            sketch.line(0, 0, 0, -15);</span>
-<span class="fc" id="L127">            sketch.noStroke();</span>
-<span class="fc" id="L128">            sketch.popMatrix();</span>
-<span class="fc" id="L129">            this.updateProjectile(1.0f / sketch.frameRate, sketch);</span>
-<span class="fc bfc" id="L130" title="All 2 branches covered.">            if (this.isThisPlayerTurn()) {</span>
-<span class="fc" id="L131">                this.drawArrow(sketch);</span>
-<span class="fc" id="L132">                this.renderPower(sketch);</span>
-<span class="fc" id="L133">                this.renderFuel(sketch);</span>
-<span class="fc" id="L134">                this.renderHealthBar(sketch);</span>
-<span class="fc" id="L135">                this.drawTurn(sketch);</span>
+<span class="fc" id="L148">            sketch.rotate(angle);</span>
+<span class="fc" id="L149">            sketch.stroke(100, 100, 100);</span>
+<span class="fc" id="L150">            sketch.strokeWeight(3);</span>
+<span class="fc" id="L151">            sketch.line(0, 0, 0, -15);</span>
+<span class="fc" id="L152">            sketch.noStroke();</span>
+<span class="fc" id="L153">            sketch.popMatrix();</span>
+<span class="fc" id="L154">            this.updateProjectile(sketch);</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">            if (this.isThisPlayerTurn()) {</span>
+<span class="fc" id="L156">                this.drawArrow(sketch);</span>
+<span class="fc" id="L157">                this.renderPower(sketch);</span>
+<span class="fc" id="L158">                this.renderFuel(sketch);</span>
+<span class="fc" id="L159">                this.renderHealthBar(sketch);</span>
+<span class="fc" id="L160">                this.drawTurn(sketch);</span>
                 //draw the parachute icon
-<span class="fc" id="L137">                sketch.textSize(22);</span>
-<span class="fc" id="L138">                sketch.fill(0);</span>
-<span class="fc" id="L139">                sketch.text(String.valueOf(this.parachuteCount), 220, 90);</span>
-<span class="fc" id="L140">                sketch.noFill();</span>
+<span class="fc" id="L162">                sketch.textSize(22);</span>
+<span class="fc" id="L163">                sketch.fill(0);</span>
+<span class="fc" id="L164">                sketch.text(String.valueOf(this.parachuteCount), 220, 90);</span>
+<span class="fc" id="L165">                sketch.noFill();</span>
             }
         }
-<span class="fc" id="L143">    }</span>
+<span class="fc" id="L168">    }</span>
+    /**
+     * Draws the arrow points to the tank each turn
+     * @param sketch the PApplet instance for drawing
+     */
     public void drawArrow(PApplet sketch){
-<span class="fc bfc" id="L145" title="All 2 branches covered.">        if(startTurnTime &lt; arrowTime) {</span>
-<span class="fc" id="L146">            sketch.pushMatrix();</span>
-<span class="fc" id="L147">            sketch.translate(this.x, this.y - 110);</span>
-<span class="fc" id="L148">            sketch.stroke(0);</span>
-<span class="fc" id="L149">            sketch.strokeWeight(2);</span>
-<span class="fc" id="L150">            sketch.line(0, 0, 0, 50);</span>
-<span class="fc" id="L151">            float arrowheadLength = 10;</span>
-<span class="fc" id="L152">            float angle = -PConstants.PI / 3;</span>
-<span class="fc" id="L153">            float endX1 = (float) (arrowheadLength * cos(angle));</span>
-<span class="fc" id="L154">            float endY1 = (float) (arrowheadLength * sin(angle));</span>
-<span class="fc" id="L155">            float endX2 = (float) (-arrowheadLength * cos(angle));</span>
-<span class="fc" id="L156">            float endY2 = (float) (arrowheadLength * sin(angle));</span>
-<span class="fc" id="L157">            sketch.line(0, 50, endX1, 50 + endY1);</span>
-<span class="fc" id="L158">            sketch.line(0, 50, endX2, 50 + endY2);</span>
-<span class="fc" id="L159">            sketch.noStroke();</span>
-<span class="fc" id="L160">            sketch.popMatrix();</span>
-<span class="fc" id="L161">            startTurnTime += 500.0f/sketch.frameRate;</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        if(startTurnTime &lt; arrowTime) {</span>
+<span class="fc" id="L175">            sketch.pushMatrix();</span>
+<span class="fc" id="L176">            sketch.translate(this.x, this.y - 110);</span>
+<span class="fc" id="L177">            sketch.stroke(0);</span>
+<span class="fc" id="L178">            sketch.strokeWeight(2);</span>
+<span class="fc" id="L179">            sketch.line(0, 0, 0, 50);</span>
+<span class="fc" id="L180">            float arrowheadLength = 10;</span>
+<span class="fc" id="L181">            float angle = -PConstants.PI / 3;</span>
+<span class="fc" id="L182">            float endX1 = (float) (arrowheadLength * cos(angle));</span>
+<span class="fc" id="L183">            float endY1 = (float) (arrowheadLength * sin(angle));</span>
+<span class="fc" id="L184">            float endX2 = (float) (-arrowheadLength * cos(angle));</span>
+<span class="fc" id="L185">            float endY2 = (float) (arrowheadLength * sin(angle));</span>
+<span class="fc" id="L186">            sketch.line(0, 50, endX1, 50 + endY1);</span>
+<span class="fc" id="L187">            sketch.line(0, 50, endX2, 50 + endY2);</span>
+<span class="fc" id="L188">            sketch.noStroke();</span>
+<span class="fc" id="L189">            sketch.popMatrix();</span>
+<span class="fc" id="L190">            startTurnTime += 500.0f/sketch.frameRate;</span>
         }
-<span class="fc" id="L163">    }</span>
-    public ArrayList&lt;Projectile&gt; getProjectile(){
-<span class="fc" id="L165">        return this.projectile;</span>
-    }
-    public float getAngle(){
-<span class="fc" id="L168">        return this.angle;</span>
-    }
-    public void drawTurn(PApplet sketch){
-<span class="fc" id="L171">        sketch.textSize(20);</span>
-<span class="fc" id="L172">        sketch.fill(0);</span>
-<span class="fc" id="L173">        sketch.text(this.currentState.generateReport(), 20, 32);</span>
-<span class="fc" id="L174">    }</span>
+<span class="fc" id="L192">    }</span>
 
+    /**
+     * Returns a list of projectils fired by the tank
+     * @return ArrayList of Projectile object
+     */
+    public ArrayList&lt;Projectile&gt; getProjectile(){
+<span class="fc" id="L199">        return this.projectile;</span>
+    }
+    /**
+     * returns the angle of the tank's turret
+     * @return float representing the angle in radians
+     */
+    public float getAngle(){
+<span class="fc" id="L206">        return this.angle;</span>
+    }
+    /**
+     * Draws the line &quot;player X's turn&quot;
+     * @param sketch the PApplet instance for drawing
+     */
+    public void drawTurn(PApplet sketch){
+<span class="fc" id="L213">        sketch.textSize(20);</span>
+<span class="fc" id="L214">        sketch.fill(0);</span>
+<span class="fc" id="L215">        sketch.text(this.currentState.generateReport(), 20, 32);</span>
+<span class="fc" id="L216">    }</span>
+    /**
+     * returns the current point of this tank
+     * @return int represent the current point of this player
+     */
     public int getPoint(){
-<span class="fc" id="L177">        return this.point;</span>
+<span class="fc" id="L222">        return this.point;</span>
     }
     public void setPoint(int point){
-<span class="fc" id="L180">        this.point = point;</span>
-<span class="fc" id="L181">        this.ultiLevel++;</span>
-<span class="fc" id="L182">    }</span>
-
+<span class="fc" id="L225">        this.point = point;</span>
+<span class="fc" id="L226">        this.ultiLevel++;</span>
+<span class="fc" id="L227">    }</span>
+    /**
+     * Check if it is this player's turn
+     * @return true if it is this plaayer's turn, false otherwise
+     */
     public boolean isThisPlayerTurn(){
-<span class="fc" id="L185">        return this.playerNumber.equals(this.currentState.getCurrentPlayer());</span>
+<span class="fc" id="L233">        return this.playerNumber.equals(this.currentState.getCurrentPlayer());</span>
     }
+    /**
+     * Draw the text represents the current fuel of this tank
+     * @param sketch PApplet instance for drawing
+     */
     public void renderFuel(PApplet sketch){
-<span class="fc" id="L188">        String text = String.valueOf(this.fuel);</span>
-<span class="fc" id="L189">        sketch.textSize(20);</span>
-<span class="fc" id="L190">        sketch.fill(0);</span>
-<span class="fc" id="L191">        sketch.text(text, 210, 32);</span>
-<span class="fc" id="L192">        sketch.noFill();</span>
-<span class="fc" id="L193">    }</span>
+<span class="fc" id="L240">        String text = String.valueOf(this.fuel);</span>
+<span class="fc" id="L241">        sketch.textSize(20);</span>
+<span class="fc" id="L242">        sketch.fill(0);</span>
+<span class="fc" id="L243">        sketch.text(text, 210, 32);</span>
+<span class="fc" id="L244">        sketch.noFill();</span>
+<span class="fc" id="L245">    }</span>
+    /**
+     * Draw the health's bar associated with this player's health
+     * @param sketch PApplet instance for drawing
+     */
     public void renderHealthBar(PApplet sketch){
-<span class="fc bfc" id="L195" title="All 2 branches covered.">        if(this.health &lt;= 0){</span>
-<span class="fc" id="L196">            this.health = 0;</span>
+<span class="fc bfc" id="L251" title="All 2 branches covered.">        if(this.health &lt;= 0){</span>
+<span class="fc" id="L252">            this.health = 0;</span>
         }
-<span class="fc" id="L198">        sketch.textSize(20);</span>
-<span class="fc" id="L199">        sketch.fill(0);</span>
-<span class="fc" id="L200">        sketch.text(&quot;Health: &quot;, 375, 32);</span>
-<span class="fc" id="L201">        sketch.noFill();</span>
-<span class="fc" id="L202">        sketch.fill(listOfColor[0], listOfColor[1], listOfColor[2]);</span>
-<span class="fc" id="L203">        sketch.rect(450, 10, 180, 30);</span>
-<span class="fc" id="L204">        sketch.strokeWeight(5);</span>
-<span class="fc" id="L205">        sketch.stroke(100, 100, 100);</span>
-<span class="fc" id="L206">        sketch.rect(450, 10, 180*this.power/100, 30);</span>
-<span class="fc" id="L207">        sketch.noStroke();</span>
+<span class="fc" id="L254">        sketch.textSize(20);</span>
+<span class="fc" id="L255">        sketch.fill(0);</span>
+<span class="fc" id="L256">        sketch.text(&quot;Health: &quot;, 375, 32);</span>
+<span class="fc" id="L257">        sketch.noFill();</span>
+<span class="fc" id="L258">        sketch.fill(listOfColor[0], listOfColor[1], listOfColor[2]);</span>
+<span class="fc" id="L259">        sketch.rect(450, 10, 180, 30);</span>
+<span class="fc" id="L260">        sketch.strokeWeight(5);</span>
+<span class="fc" id="L261">        sketch.stroke(100, 100, 100);</span>
+<span class="fc" id="L262">        sketch.rect(450, 10, 180*this.power/100, 30);</span>
+<span class="fc" id="L263">        sketch.noStroke();</span>
         //The line
-<span class="fc" id="L209">        sketch.strokeWeight(2);</span>
-<span class="fc" id="L210">        sketch.stroke(255, 0, 0);</span>
-<span class="fc" id="L211">        sketch.line(450 + 180*this.power/100, 5, 450 + 180*this.power/100, 40);</span>
-<span class="fc" id="L212">        sketch.noStroke();</span>
+<span class="fc" id="L265">        sketch.strokeWeight(2);</span>
+<span class="fc" id="L266">        sketch.stroke(255, 0, 0);</span>
+<span class="fc" id="L267">        sketch.line(450 + 180*this.power/100, 5, 450 + 180*this.power/100, 40);</span>
+<span class="fc" id="L268">        sketch.noStroke();</span>
         //remaining health;
-<span class="fc bfc" id="L214" title="All 2 branches covered.">        if(this.health &lt; 100) {</span>
-<span class="fc" id="L215">            sketch.fill(255);</span>
-<span class="fc" id="L216">            sketch.stroke(0);</span>
-<span class="fc" id="L217">            sketch.strokeWeight(2);</span>
-<span class="fc" id="L218">            sketch.rect(450 + 180 * this.health / 100, 10, 630 - (450 + 180 * this.health / 100), 30);</span>
-<span class="fc" id="L219">            sketch.noStroke();</span>
-<span class="fc" id="L220">            sketch.noFill();</span>
+<span class="fc bfc" id="L270" title="All 2 branches covered.">        if(this.health &lt; 100) {</span>
+<span class="fc" id="L271">            sketch.fill(255);</span>
+<span class="fc" id="L272">            sketch.stroke(0);</span>
+<span class="fc" id="L273">            sketch.strokeWeight(2);</span>
+<span class="fc" id="L274">            sketch.rect(450 + 180 * this.health / 100, 10, 630 - (450 + 180 * this.health / 100), 30);</span>
+<span class="fc" id="L275">            sketch.noStroke();</span>
+<span class="fc" id="L276">            sketch.noFill();</span>
         }
-<span class="fc" id="L222">        sketch.fill(0);</span>
-<span class="fc" id="L223">        sketch.textSize(24);</span>
-<span class="fc" id="L224">        sketch.text(String.valueOf(this.health), 650, 32);</span>
-<span class="fc" id="L225">        sketch.noFill();</span>
-<span class="fc" id="L226">    }</span>
+<span class="fc" id="L278">        sketch.fill(0);</span>
+<span class="fc" id="L279">        sketch.textSize(24);</span>
+<span class="fc" id="L280">        sketch.text(String.valueOf(this.health), 650, 32);</span>
+<span class="fc" id="L281">        sketch.noFill();</span>
+<span class="fc" id="L282">    }</span>
+    /**
+     * Draw the text represents the current power of this tank
+     * @param sketch PApplet instance for drawing
+     */
     public void renderPower(PApplet sketch){
-<span class="fc bfc" id="L228" title="All 2 branches covered.">        if(this.power &gt; this.health){</span>
-<span class="fc" id="L229">            this.power = this.health;</span>
+<span class="fc bfc" id="L288" title="All 2 branches covered.">        if(this.power &gt; this.health){</span>
+<span class="fc" id="L289">            this.power = this.health;</span>
         }
-<span class="fc bfc" id="L231" title="All 2 branches covered.">        if(this.power &lt; 0){</span>
-<span class="fc" id="L232">            this.power = 0;</span>
+<span class="fc bfc" id="L291" title="All 2 branches covered.">        if(this.power &lt; 0){</span>
+<span class="fc" id="L292">            this.power = 0;</span>
         }
-<span class="fc" id="L234">        sketch.fill(0);</span>
-<span class="fc" id="L235">        sketch.textSize(22);</span>
-<span class="fc" id="L236">        sketch.text(&quot;Power: &quot;, 375, 70);</span>
-<span class="fc" id="L237">        String powerTank = String.valueOf((int) this.power);</span>
-<span class="fc" id="L238">        sketch.text(powerTank,450, 70);</span>
-<span class="fc" id="L239">        sketch.noFill();</span>
-<span class="fc" id="L240">    }</span>
-    public void updatePower(PApplet sketch, char key){
-<span class="fc" id="L242">        float deltaTime = 1.0f/sketch.frameRate;</span>
-<span class="fc bfc" id="L243" title="All 2 branches covered.">        if(this.power &gt; this.health){</span>
-<span class="fc" id="L244">            this.power = this.health;</span>
+<span class="fc" id="L294">        sketch.fill(0);</span>
+<span class="fc" id="L295">        sketch.textSize(22);</span>
+<span class="fc" id="L296">        sketch.text(&quot;Power: &quot;, 375, 70);</span>
+<span class="fc" id="L297">        String powerTank = String.valueOf((int) this.power);</span>
+<span class="fc" id="L298">        sketch.text(powerTank,450, 70);</span>
+<span class="fc" id="L299">        sketch.noFill();</span>
+<span class="fc" id="L300">    }</span>
+    /**
+     * Update power of this tank based on the user's input
+     * @param key the character key pressed by user
+     */
+    public void updatePower(char key){
+<span class="fc" id="L306">        float deltaTime = 1.0f/30;</span>
+<span class="fc bfc" id="L307" title="All 2 branches covered.">        if(this.power &gt; this.health){</span>
+<span class="fc" id="L308">            this.power = this.health;</span>
         }
-<span class="fc bfc" id="L246" title="All 2 branches covered.">        if(this.power &lt; 0){</span>
-<span class="fc" id="L247">            this.power = 0;</span>
+<span class="fc bfc" id="L310" title="All 2 branches covered.">        if(this.power &lt; 0){</span>
+<span class="fc" id="L311">            this.power = 0;</span>
         }
         else{
-<span class="fc bfc" id="L250" title="All 2 branches covered.">            if(key == 'w'){</span>
-<span class="fc" id="L251">                this.power += 36*deltaTime;</span>
-
+<span class="fc bfc" id="L314" title="All 2 branches covered.">            if(key == 'w'){</span>
+<span class="fc" id="L315">                this.power += 36*deltaTime;</span>
             }
-<span class="fc bfc" id="L254" title="All 2 branches covered.">            if(key == 's'){</span>
-<span class="fc" id="L255">                this.power -= 36*deltaTime;</span>
-
+<span class="fc bfc" id="L317" title="All 2 branches covered.">            if(key == 's'){</span>
+<span class="fc" id="L318">                this.power -= 36*deltaTime;</span>
             }
         }
-<span class="fc" id="L259">    }</span>
-<span class="fc" id="L260">    int j = 1;</span>
-    public void setUltilevel(int level){
-<span class="fc" id="L262">        this.ultiLevel = level;</span>
-<span class="fc" id="L263">    }</span>
-    public void setParachuteCount(int number){
-<span class="fc" id="L265">        this.parachuteCount = number;</span>
-<span class="fc" id="L266">    }</span>
+<span class="fc" id="L321">    }</span>
 
-    public void fireProjectile(PApplet sketch, char key) {
-<span class="pc bpc" id="L269" title="1 of 4 branches missed.">        if(key == ' ' &amp;&amp; !hasFired) {</span>
-<span class="fc bfc" id="L270" title="All 2 branches covered.">            if(this.ultiLevel == 3){</span>
-<span class="fc bfc" id="L271" title="All 2 branches covered.">                for(int i = 0; i &lt; 5; i++){</span>
-<span class="fc" id="L272">                    Projectile newProjectile = new Projectile(this, this.turretX, this.turretY, this.power * 9 / 100 + i*10*9/100, angle, averageHeight, true);</span>
-<span class="fc" id="L273">                    this.projectile.add(newProjectile);</span>
-<span class="fc" id="L274">                    j++;</span>
+    /**
+     * set the ultilvel for this player to a new number
+     * @param level int represents the new level
+     */
+    public void setUltilevel(int level){
+<span class="fc" id="L328">        this.ultiLevel = level;</span>
+<span class="fc" id="L329">    }</span>
+    /**
+     * set the parachutee count for this player to a new number
+     * @param number int represents the new parachute count
+     */
+    public void setParachuteCount(int number){
+<span class="fc" id="L335">        this.parachuteCount = number;</span>
+<span class="fc" id="L336">    }</span>
+    /**
+     * Fires a pprojectile from this tank
+     * @param key char represents the input from the user when fire a projectile
+     */
+    public void fireProjectile(char key) {
+<span class="pc bpc" id="L342" title="1 of 4 branches missed.">        if(key == ' ' &amp;&amp; !hasFired) {</span>
+<span class="fc bfc" id="L343" title="All 2 branches covered.">            if(this.ultiLevel == 3){</span>
+<span class="fc bfc" id="L344" title="All 2 branches covered.">                for(int i = 0; i &lt; 5; i++){</span>
+<span class="fc" id="L345">                    Projectile newProjectile = new Projectile(this, this.turretX, this.turretY, this.power * 9 / 100 + i*10*9/100, angle, averageHeight, true);</span>
+<span class="fc" id="L346">                    this.projectile.add(newProjectile);</span>
+<span class="fc" id="L347">                    j++;</span>
                 }
-<span class="fc" id="L276">                this.ultiLevel = 0;</span>
+<span class="fc" id="L349">                this.ultiLevel = 0;</span>
             }
             else{
-<span class="fc" id="L279">                Projectile newProjectile = new Projectile(this, this.turretX, this.turretY, this.power * 9 / 100, angle, averageHeight, false);</span>
-<span class="fc" id="L280">                this.projectile.add(newProjectile);</span>
+<span class="fc" id="L352">                Projectile newProjectile = new Projectile(this, this.turretX, this.turretY, this.power * 9 / 100, angle, averageHeight, false);</span>
+<span class="fc" id="L353">                this.projectile.add(newProjectile);</span>
             }
-<span class="fc" id="L282">            hasFired = true;</span>
-
+<span class="fc" id="L355">            hasFired = true;</span>
         }
-<span class="fc" id="L285">    }</span>
+<span class="fc" id="L357">    }</span>
+    /**
+     * Resets the state of the tank when get to new level
+     */
     public void resetState(){
-<span class="fc" id="L287">        this.health = 100;</span>
-<span class="fc" id="L288">        this.power = 50;</span>
-<span class="fc" id="L289">        this.ultiLevel = 0;</span>
-<span class="fc" id="L290">        this.fuel = 250;</span>
-<span class="fc" id="L291">        this.projectile.clear();</span>
-<span class="fc" id="L292">        this.tankExplosion.clear();</span>
-<span class="fc" id="L293">        hasTurnedOff = false;</span>
-<span class="fc" id="L294">        isDead = false;</span>
-<span class="fc" id="L295">    }</span>
+<span class="fc" id="L362">        this.health = 100;</span>
+<span class="fc" id="L363">        this.power = 50;</span>
+<span class="fc" id="L364">        this.ultiLevel = 0;</span>
+<span class="fc" id="L365">        this.fuel = 250;</span>
+<span class="fc" id="L366">        this.projectile.clear();</span>
+<span class="fc" id="L367">        this.tankExplosion.clear();</span>
+<span class="fc" id="L368">        hasTurnedOff = false;</span>
+<span class="fc" id="L369">        isDead = false;</span>
+<span class="fc" id="L370">    }</span>
+    /**
+     * Returns the color in r g b of the tank
+     * @return int[] Array of RGB values
+     */
     public int[] getColourList(){
-<span class="fc" id="L297">        return listOfColor;</span>
+<span class="fc" id="L376">        return listOfColor;</span>
     }
-
-    public void updateProjectile(float deltaTime, PApplet sketch){
-<span class="fc" id="L301">        int windPower = this.currentState.getWind();</span>
-<span class="fc" id="L302">        Iterator&lt;Projectile&gt; it = this.projectile.iterator();</span>
-<span class="pc bpc" id="L303" title="1 of 4 branches missed.">        if(this.projectile != null &amp;&amp; !this.projectile.isEmpty()){</span>
-<span class="fc bfc" id="L304" title="All 2 branches covered.">            while(it.hasNext()){</span>
-<span class="fc" id="L305">                Projectile p = it.next();</span>
-<span class="fc bfc" id="L306" title="All 2 branches covered.">                if(!p.hasDoneFired(sketch, averageHeight)){</span>
-<span class="fc" id="L307">                    p.fire(1.0f/sketch.frameRate, windPower);</span>
-<span class="fc" id="L308">                    p.renderProjectile(sketch, listOfColor);</span>
+    /**
+     * Keep track of the projectile to see whether it hit the terrain or other tanks
+     * @param deltaTime time per frame to calculate
+     * @param sketch PApplet instance for drawing
+     */
+    public void updateProjectile(PApplet sketch){
+<span class="fc" id="L384">        int windPower = this.currentState.getWind();</span>
+<span class="fc" id="L385">        Iterator&lt;Projectile&gt; it = this.projectile.iterator();</span>
+<span class="pc bpc" id="L386" title="1 of 4 branches missed.">        if(this.projectile != null &amp;&amp; !this.projectile.isEmpty()){</span>
+<span class="fc bfc" id="L387" title="All 2 branches covered.">            while(it.hasNext()){</span>
+<span class="fc" id="L388">                Projectile p = it.next();</span>
+<span class="fc bfc" id="L389" title="All 2 branches covered.">                if(!p.hasDoneFired(sketch, averageHeight)){</span>
+<span class="fc" id="L390">                    p.fire(windPower);</span>
+<span class="fc" id="L391">                    p.renderProjectile(sketch, listOfColor);</span>
                 }
                 else{
-<span class="fc" id="L311">                    it.remove();</span>
+<span class="fc" id="L394">                    it.remove();</span>
                 }
-<span class="fc" id="L313">            }</span>
+<span class="fc" id="L396">            }</span>
         }
-<span class="fc" id="L315">    }</span>
+<span class="fc" id="L398">    }</span>
+    /**
+     * Set the current fuel of this tank to a new number
+     * @param fuel int represents the new fuel's amount
+     */
     public void setFuel(int fuel){
-<span class="fc" id="L317">        this.fuel = fuel;</span>
-<span class="fc" id="L318">    }</span>
+<span class="fc" id="L404">        this.fuel = fuel;</span>
+<span class="fc" id="L405">    }</span>
+    /**
+     * Returns the current amount of fuel by this player
+     * @return integer represents the current amount of fuel of this tank
+     */
     public int getFuel(){
-<span class="fc" id="L320">        return this.fuel;</span>
+<span class="fc" id="L411">        return this.fuel;</span>
     }
-    public void powerUps(PApplet sketch, char key){
-<span class="fc bfc" id="L323" title="All 2 branches covered.">        if(key == 'r'){</span>
-<span class="fc bfc" id="L324" title="All 2 branches covered.">            if(this.point &gt; 20){</span>
-<span class="fc" id="L325">                this.point -= 20;</span>
-<span class="fc" id="L326">                this.health += 20;</span>
-<span class="fc bfc" id="L327" title="All 2 branches covered.">                if(this.health &gt; 100){</span>
-<span class="fc" id="L328">                    this.health = 100;</span>
+    /**
+     * Buys health or fuel by the current point of this player depends on the input from user
+     * @param key character represent the input from the user
+     */
+    public void powerUps(char key){
+<span class="fc bfc" id="L418" title="All 2 branches covered.">        if(key == 'r'){</span>
+<span class="fc bfc" id="L419" title="All 2 branches covered.">            if(this.point &gt; 20){</span>
+<span class="fc" id="L420">                this.point -= 20;</span>
+<span class="fc" id="L421">                this.health += 20;</span>
+<span class="fc bfc" id="L422" title="All 2 branches covered.">                if(this.health &gt; 100){</span>
+<span class="fc" id="L423">                    this.health = 100;</span>
                 }
             }
         }
-<span class="pc bpc" id="L332" title="1 of 2 branches missed.">        else if(key == 'f'){</span>
-<span class="fc bfc" id="L333" title="All 2 branches covered.">            if(this.point &gt; 10){</span>
-<span class="fc" id="L334">                this.point -= 10;</span>
-<span class="fc" id="L335">                this.fuel += 200;</span>
+<span class="pc bpc" id="L427" title="1 of 2 branches missed.">        else if(key == 'f'){</span>
+<span class="fc bfc" id="L428" title="All 2 branches covered.">            if(this.point &gt; 10){</span>
+<span class="fc" id="L429">                this.point -= 10;</span>
+<span class="fc" id="L430">                this.fuel += 200;</span>
             }
         }
-<span class="fc" id="L338">    }</span>
+<span class="fc" id="L433">    }</span>
+    /**
+     * Move to another player turn, set the fire status to false and the drawing time for the arrow to 0
+     */
     public void endTurn(){
-<span class="fc bfc" id="L340" title="All 2 branches covered.">        if(hasFired){</span>
-<span class="fc" id="L341">            this.currentState.nextTurn();</span>
-<span class="fc" id="L342">            hasFired = false;</span>
-<span class="fc" id="L343">            startTurnTime = 0;</span>
+<span class="fc bfc" id="L438" title="All 2 branches covered.">        if(hasFired){</span>
+<span class="fc" id="L439">            this.currentState.nextTurn();</span>
+<span class="fc" id="L440">            hasFired = false;</span>
+<span class="fc" id="L441">            startTurnTime = 0;</span>
         }
-<span class="fc" id="L345">    }</span>
+<span class="fc" id="L443">    }</span>
+    /**
+     * Returns the current health of this player
+     * @return integer represents the health of this player
+     */
     public int getHealth(){
-<span class="fc" id="L347">        return this.health;</span>
+<span class="fc" id="L449">        return this.health;</span>
     }
-    public void setHealth(int damage){
-<span class="fc" id="L350">        this.health = damage;</span>
-<span class="fc" id="L351">    }</span>
-
+    /**
+     * Set the health of this player to a new number
+     * @param health intetger represent the new amount of health
+     */
+    public void setHealth(int health){
+<span class="fc" id="L456">        this.health = health;</span>
+<span class="fc" id="L457">    }</span>
+    /**
+     * Returns number of parachute left of this player
+     * @return an integer represents the number of parachute left
+     */
     public int getParachuteCount(){
-<span class="fc" id="L354">        return this.parachuteCount;</span>
+<span class="fc" id="L463">        return this.parachuteCount;</span>
     }
+    /**
+     * decides whether to deploy a parachute to this tank based on the parachute count left, the tanks falls to the neweY coordinate
+     * @param deltaTime a float represents time per frame
+     * @param newY the new Y coordinate of this tank
+     */
     public void reduceY(float deltaTime, float newY){
-<span class="pc bpc" id="L357" title="1 of 6 branches missed.">        if(this.y &lt; newY &amp;&amp; this.parachuteCount &gt; 0 &amp;&amp; !isDead) {</span>
-<span class="fc" id="L358">            this.renderParachute(this.sketch);</span>
-<span class="fc" id="L359">            this.y += deltaTime * 60.0f;</span>
-<span class="fc bfc" id="L360" title="All 2 branches covered.">            if(this.y &gt;= newY){</span>
-<span class="fc" id="L361">                this.y = newY;</span>
-<span class="fc" id="L362">                this.parachuteCount -= 1;</span>
+<span class="pc bpc" id="L471" title="2 of 6 branches missed.">        if(this.y &lt; newY &amp;&amp; this.parachuteCount &gt; 0 &amp;&amp; !isDead) {</span>
+<span class="fc" id="L472">            this.renderParachute(this.sketch);</span>
+<span class="fc" id="L473">            this.y += deltaTime * 60.0f;</span>
+<span class="fc bfc" id="L474" title="All 2 branches covered.">            if(this.y &gt;= newY){</span>
+<span class="fc" id="L475">                this.y = newY;</span>
+<span class="fc" id="L476">                this.parachuteCount -= 1;</span>
             }
         }
-<span class="fc bfc" id="L365" title="All 2 branches covered.">        else if(this.parachuteCount == 0){</span>
-<span class="fc" id="L366">            this.y += deltaTime * 120.0f;</span>
-<span class="fc bfc" id="L367" title="All 2 branches covered.">            if(this.y &gt;= newY){</span>
-<span class="fc" id="L368">                this.y = newY;</span>
+<span class="pc bpc" id="L479" title="1 of 2 branches missed.">        else if(this.parachuteCount == 0){</span>
+<span class="fc" id="L480">            this.y += deltaTime * 120.0f;</span>
+<span class="fc bfc" id="L481" title="All 2 branches covered.">            if(this.y &gt;= newY){</span>
+<span class="fc" id="L482">                this.y = newY;</span>
             }
         }
-<span class="fc" id="L371">    }</span>
-    public void updateTurret(float deltaTime, PApplet sketch, int keyCode){
-<span class="fc" id="L373">        float speed = 3.0f; //3 radians per second</span>
-<span class="fc bfc" id="L374" title="All 2 branches covered.">        if (keyCode == PConstants.UP) {</span>
-<span class="fc bfc" id="L375" title="All 2 branches covered.">            if (this.angle &gt; 1.57F) {</span>
-<span class="fc" id="L376">                this.angle = 1.57F;</span>
+<span class="fc" id="L485">    }</span>
+    /**
+     * update the tank turret's angle based on the input from the user
+     * @param keyCode the keyCode of the input
+     */
+    public void updateTurret(int keyCode){
+<span class="fc" id="L491">        float speed = 3.0f; //3 radians per second</span>
+<span class="fc bfc" id="L492" title="All 2 branches covered.">        if (keyCode == PConstants.UP) {</span>
+<span class="fc bfc" id="L493" title="All 2 branches covered.">            if (this.angle &gt; 1.57F) {</span>
+<span class="fc" id="L494">                this.angle = 1.57F;</span>
             }
-<span class="fc" id="L378">            this.angle += speed/30;</span>
-<span class="pc bpc" id="L379" title="1 of 2 branches missed.">        } else if (keyCode == PConstants.DOWN) {</span>
-<span class="fc bfc" id="L380" title="All 2 branches covered.">            if (this.angle &lt; -1.57F) {</span>
-<span class="fc" id="L381">                this.angle = -1.57F;</span>
+<span class="fc" id="L496">            this.angle += speed/30;</span>
+<span class="pc bpc" id="L497" title="1 of 2 branches missed.">        } else if (keyCode == PConstants.DOWN) {</span>
+<span class="fc bfc" id="L498" title="All 2 branches covered.">            if (this.angle &lt; -1.57F) {</span>
+<span class="fc" id="L499">                this.angle = -1.57F;</span>
             }
-<span class="fc" id="L383">            this.angle -= speed/30;</span>
+<span class="fc" id="L501">            this.angle -= speed/30;</span>
         }
 
-<span class="fc" id="L386">    }</span>
+<span class="fc" id="L504">    }</span>
+    /**
+     * Set the angle of this tank to a new number
+     * @param angle a floar represents the new angle
+     */
     public void setAngle(float angle){
-<span class="fc" id="L388">        this.angle = angle;</span>
-<span class="fc" id="L389">    }</span>
-    public void updateMovement(float deltaTime, PApplet sketch, int keyCode){
-<span class="fc bfc" id="L391" title="All 4 branches covered.">        if (keyCode == PConstants.RIGHT &amp;&amp; this.fuel &gt; 0) {</span>
-<span class="fc" id="L392">            this.goRight(deltaTime);</span>
-<span class="fc" id="L393">            this.fuel -= 1;</span>
+<span class="fc" id="L510">        this.angle = angle;</span>
+<span class="fc" id="L511">    }</span>
+    /**
+     * update the tank's position based on the input from the user
+     * @param keyCode the keyCode of the input
+     */
+    public void updateMovement(int keyCode){
+<span class="fc bfc" id="L517" title="All 4 branches covered.">        if (keyCode == PConstants.RIGHT &amp;&amp; this.fuel &gt; 0) {</span>
+<span class="fc" id="L518">            this.goRight();</span>
+<span class="fc" id="L519">            this.fuel -= 1;</span>
         }
-<span class="fc bfc" id="L395" title="All 4 branches covered.">        if (keyCode == PConstants.LEFT &amp;&amp; this.fuel &gt; 0) {</span>
-<span class="fc" id="L396">            this.goLeft(deltaTime);</span>
-<span class="fc" id="L397">            this.fuel -= 1;</span>
+<span class="fc bfc" id="L521" title="All 4 branches covered.">        if (keyCode == PConstants.LEFT &amp;&amp; this.fuel &gt; 0) {</span>
+<span class="fc" id="L522">            this.goLeft();</span>
+<span class="fc" id="L523">            this.fuel -= 1;</span>
         }
 
-<span class="fc" id="L400">    }</span>
+<span class="fc" id="L526">    }</span>
+    /**
+     * set the average height of the terrain this tank is playing, ensure transition to new level smoothly
+     * @param newAverage a float[] Array represents the new height of the terrain
+     */
     public void setAverageHeight(float[] newAverage){
-<span class="fc" id="L402">        averageHeight = newAverage;</span>
-<span class="fc" id="L403">    }</span>
+<span class="fc" id="L532">        averageHeight = newAverage;</span>
+<span class="fc" id="L533">    }</span>
+    /**
+     * Update the posisition of the tank per frame when it goes left
+     */
     @Override
-    public void goLeft(float deltaTime) {
-<span class="fc" id="L406">        this.x -= 2;</span>
-<span class="fc bfc" id="L407" title="All 2 branches covered.">        if(this.x &lt; 0){</span>
-<span class="fc" id="L408">            this.x = 0;</span>
+    public void goLeft() {
+<span class="fc" id="L539">        this.x -= 2;</span>
+<span class="fc bfc" id="L540" title="All 2 branches covered.">        if(this.x &lt; 0){</span>
+<span class="fc" id="L541">            this.x = 0;</span>
         }
 
-<span class="fc" id="L411">        this.y = averageHeight[this.x];</span>
-<span class="fc" id="L412">    }</span>
-
+<span class="fc" id="L544">        this.y = averageHeight[this.x];</span>
+<span class="fc" id="L545">    }</span>
+    /**
+     * update the state of the game where this tank is playing, for example update from level1 to level2
+     * @param newState a GameState instane represents the new state of the game
+     */
     public void setState(GameState newState){
-<span class="fc" id="L415">        this.currentState = newState;</span>
-<span class="fc" id="L416">    }</span>
+<span class="fc" id="L551">        this.currentState = newState;</span>
+<span class="fc" id="L552">    }</span>
+    /**
+     * Update the posisition of the tank per frame when it goes right
+     */
     @Override
-    public void goRight(float deltaTime) {
-<span class="fc" id="L419">        this.x += 2;</span>
+    public void goRight() {
+<span class="fc" id="L558">        this.x += 2;</span>
 
-<span class="fc bfc" id="L421" title="All 2 branches covered.">        if(this.x &gt; 864){</span>
-<span class="fc" id="L422">            this.x = 864;</span>
+<span class="fc bfc" id="L560" title="All 2 branches covered.">        if(this.x &gt; 864){</span>
+<span class="fc" id="L561">            this.x = 864;</span>
         }
-<span class="fc" id="L424">        this.y = averageHeight[this.x];</span>
-<span class="fc" id="L425">    }</span>
-
-    public String getCurrentPlayer(){
-<span class="fc" id="L428">        return this.playerNumber;</span>
-    }
+<span class="fc" id="L563">        this.y = averageHeight[this.x];</span>
+<span class="fc" id="L564">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -16,33 +16,49 @@ public class Explosion extends Thing{
 <span class="fc" id="L16">        this.radius = radius;</span>
 <span class="fc" id="L17">        this.startTime = this.sketch.millis();</span>
 <span class="fc" id="L18">    }</span>
+
+    /**
+     * Retrieves the tank that cause the explosion
+     * @return The tank that caused this explosion
+     */
     public Tank getTank(){
-<span class="fc" id="L20">        return this.tank;</span>
+<span class="fc" id="L25">        return this.tank;</span>
     }
+    /**
+     * Draw the explosion, which expands over time until it reaches its limit
+     */
     public void drawExplosion(){
-<span class="pc bpc" id="L23" title="1 of 2 branches missed.">        if(!hasDoneExplode){</span>
-<span class="fc" id="L24">            float currentTime = this.sketch.millis();</span>
-<span class="fc bfc" id="L25" title="All 2 branches covered.">            if(currentTime &gt;= (this.startTime + time)){</span>
-<span class="fc" id="L26">                hasDoneExplode = true;</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if(!hasDoneExplode){</span>
+<span class="fc" id="L32">            float currentTime = this.sketch.millis();</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">            if(currentTime &gt;= (this.startTime + time)){</span>
+<span class="fc" id="L34">                hasDoneExplode = true;</span>
             }
             else {
-<span class="fc" id="L29">                this.sketch.fill(255,0, 0);</span>
-<span class="fc" id="L30">                this.sketch.ellipse(this.x, this.y, this.radius*2*(currentTime - this.startTime)/200, this.radius*2*(currentTime-startTime)/200);</span>
+<span class="fc" id="L37">                this.sketch.fill(255,0, 0);</span>
+<span class="fc" id="L38">                this.sketch.ellipse(this.x, this.y, this.radius*2*(currentTime - this.startTime)/200, this.radius*2*(currentTime-startTime)/200);</span>
 
-<span class="fc" id="L32">                this.sketch.fill(255, 150, 0);</span>
-<span class="fc" id="L33">                this.sketch.ellipse(this.x, this.y, this.radius*(currentTime - this.startTime)/200, this.radius*(currentTime-startTime)/200);</span>
+<span class="fc" id="L40">                this.sketch.fill(255, 150, 0);</span>
+<span class="fc" id="L41">                this.sketch.ellipse(this.x, this.y, this.radius*(currentTime - this.startTime)/200, this.radius*(currentTime-startTime)/200);</span>
 
-<span class="fc" id="L35">                this.sketch.fill(255, 255, 0);</span>
-<span class="fc" id="L36">                this.sketch.ellipse(this.x, this.y, this.radius*0.4f*(currentTime-this.startTime)/200, this.radius*0.4f*(currentTime-startTime)/200);</span>
+<span class="fc" id="L43">                this.sketch.fill(255, 255, 0);</span>
+<span class="fc" id="L44">                this.sketch.ellipse(this.x, this.y, this.radius*0.4f*(currentTime-this.startTime)/200, this.radius*0.4f*(currentTime-startTime)/200);</span>
             }
         }
-<span class="fc" id="L39">    }</span>
+<span class="fc" id="L47">    }</span>
 
+    /**
+     * Return the radius of this explosion
+     * @return a float represents the radius of this explosion
+     */
     public float getRadius(){
-<span class="fc" id="L42">        return this.radius;</span>
+<span class="fc" id="L54">        return this.radius;</span>
     }
+    /**
+     * Check if this explosion has completed the animation
+     * @return true if it has completed, false otherwise
+     */
     public boolean isHasDoneExplode(){
-<span class="fc" id="L45">        return hasDoneExplode;</span>
+<span class="fc" id="L61">        return hasDoneExplode;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

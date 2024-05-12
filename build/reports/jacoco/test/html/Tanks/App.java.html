@@ -116,19 +116,19 @@ public class App extends PApplet {
 <span class="fc bfc" id="L116" title="All 2 branches covered.">        for (Tank tank : new ArrayList&lt;&gt;(allLevels.get(index).getTanksList())) {</span>
 <span class="pc bpc" id="L117" title="1 of 4 branches missed.">            if (tank.isThisPlayerTurn() &amp;&amp; allTerrains.get(index).getAverageHeight()[tank.getX()] &lt;= tank.getY()) {</span>
 <span class="fc bfc" id="L118" title="All 4 branches covered.">                if(event.getKeyCode() == 38 || event.getKeyCode() == 40){</span>
-<span class="fc" id="L119">                    tank.updateTurret(1.0f/this.frameRate, this, event.getKeyCode());</span>
+<span class="fc" id="L119">                    tank.updateTurret(event.getKeyCode());</span>
                 }
 <span class="fc bfc" id="L121" title="All 4 branches covered.">                if(event.getKeyCode() == PConstants.RIGHT || event.getKeyCode() == PConstants.LEFT){</span>
-<span class="fc" id="L122">                    tank.updateMovement(1.0f/this.frameRate, this, event.getKeyCode());</span>
+<span class="fc" id="L122">                    tank.updateMovement(event.getKeyCode());</span>
                 }
 <span class="fc bfc" id="L124" title="All 4 branches covered.">                if(event.getKey() == 'w' || event.getKey() == 's'){</span>
-<span class="fc" id="L125">                    tank.updatePower(this, event.getKey());</span>
+<span class="fc" id="L125">                    tank.updatePower(event.getKey());</span>
                 }
 <span class="fc bfc" id="L127" title="All 6 branches covered.">                if(event.getKey() == 'f' || event.getKey() == 'r' &amp;&amp; !allLevels.get(index).isGameOver()){</span>
-<span class="fc" id="L128">                    tank.powerUps(this, event.getKey());</span>
+<span class="fc" id="L128">                    tank.powerUps(event.getKey());</span>
                 }
 <span class="fc bfc" id="L130" title="All 2 branches covered.">                if(event.getKey() == ' '){</span>
-<span class="fc" id="L131">                    tank.fireProjectile(this, event.getKey());</span>
+<span class="fc" id="L131">                    tank.fireProjectile(event.getKey());</span>
                 }
 <span class="fc bfc" id="L133" title="All 4 branches covered.">                if(event.getKey() == 'r' &amp;&amp; allLevels.get(index).isGameOver()){</span>
 <span class="fc" id="L134">                    allLevels.clear();</span>

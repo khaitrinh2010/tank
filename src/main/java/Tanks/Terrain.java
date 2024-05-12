@@ -135,8 +135,9 @@ public class Terrain {
 
     /**
      * Set the height of the tank to new height if the terrain is destroyed, also check whether the tank has been deduced health by falling
+     * @param sketch
      */
-    public void updateTankHeight(){
+    public void updateTankHeight(PApplet sketch){
         ArrayList<Explosion> destruct = new ArrayList<>(this.destruction);
         Explosion explosion = null;
         Tank tankCause = null;
@@ -167,7 +168,13 @@ public class Terrain {
         }
         this.destruction.clear();
     }
-
+    /**
+     * When a level is transited, update the tanks active in this terrain.
+     * @param tanks, a new ArrayList of Tank object.
+     */
+    public void setTanks(ArrayList<Tank> tanks){
+        this.tanksList = tanks;
+    }
     /**
      * Set the game state associated with this terrain
      * @param newState, a GameState object.
@@ -175,7 +182,6 @@ public class Terrain {
     public void setState(GameState newState){
         this.gameState = newState;
     }
-
     /**
      * Get the tanks that are displayed on this terrain
      * @return an ArrayList of Tank object
@@ -183,7 +189,6 @@ public class Terrain {
     public ArrayList<Tank> getTankList(){
         return this.tanksList;
     }
-
     /**
      * adjust the height of the terrain at any specific point
      * @param index, the x coordinate want to be changed
@@ -192,15 +197,6 @@ public class Terrain {
     public void setTerrain(int index, float newY){
         this.averageHeight[index] = newY;
     }
-
-    /**
-     * When a level is transited, update the tanks active in this terrain.
-     * @param tanks, a new ArrayList of Tank object.
-     */
-    public void setTanks(ArrayList<Tank> tanks){
-        this.tanksList = tanks;
-    }
-
     /**
      * Renders the terrain including tanks, explosions, and other elements.
      *
@@ -220,7 +216,7 @@ public class Terrain {
             drawExplosion();
             updateTerrain(this.destruction);
             updateTank(this.destruction);
-            this.updateTankHeight();
+            this.updateTankHeight(sketch);
             for (int i = 0; i < this.averageHeight.length; i++) {
                 sketch.stroke(colorList[0], colorList[1], colorList[2]);
                 sketch.rect(i, this.averageHeight[i], 1, 640 - this.averageHeight[i]);
